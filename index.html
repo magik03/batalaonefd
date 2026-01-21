@@ -3,117 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البوابة الإلكترونية الموحدة - النسخة الكاملة</title>
-    
+    <title>البوابة الرقمية - سوبير إعلام آلي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <style>
         :root {
-            --primary: #4e73df;
-            --primary-dark: #224abe;
-            --secondary: #2d3436;
-            --success: #1cc88a;
-            --white: #ffffff;
-            --shadow: 0 15px 35px rgba(0,0,0,0.1);
+            --primary: #4e73df; --success: #1cc88a; --dark: #2d3436; --bg: #f8f9fc;
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            direction: rtl;
+            font-family: 'Cairo', sans-serif; background-color: var(--bg);
+            margin: 0; direction: rtl;
         }
 
-        /* الطبقة 1: الواجهة الرئيسية */
-        .main-gateway {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #f8fafc 0%, #cfd9df 100%);
+        /* الطبقة 1: الواجهة الرئيسية (كما في الصور) */
+        .gateway-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #cfd9df 100%);
         }
 
         .welcome-card {
-            background: white;
-            padding: 50px;
-            border-radius: 30px;
-            box-shadow: var(--shadow);
-            text-align: center;
-            max-width: 550px;
-            width: 90%;
-            border-top: 10px solid var(--primary);
+            background: white; padding: 50px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center; max-width: 550px; width: 90%; border-top: 10px solid var(--primary);
         }
 
-        .gateway-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            padding: 22px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 22px;
-            font-weight: 900;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            font-family: 'Cairo';
+        .main-logo {
+            width: 100px; height: 100px; background: var(--primary); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 50px; margin: 0 auto 20px; box-shadow: 0 10px 20px rgba(78,115,223,0.3);
+        }
+
+        .nav-btn {
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            width: 100%; padding: 22px; margin: 15px 0; border: none; border-radius: 15px;
+            font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.3s;
+            text-decoration: none; font-family: 'Cairo';
         }
 
         .btn-blue { background: var(--primary); color: white; }
-        .btn-dark { background: var(--secondary); color: white; }
-        .gateway-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-dark { background: var(--dark); color: white; }
+        .nav-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        /* الطبقة 2: شاشة اختيار النوع */
+        /* الطبقة 2: اختيار النوع */
         .selection-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(8px);
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px);
         }
 
-        .option-box {
-            background: white;
-            padding: 40px;
-            border-radius: 25px;
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-        }
+        .option-box { background: white; padding: 40px; border-radius: 25px; width: 90%; max-width: 500px; text-align: center; }
 
         .type-select-btn {
-            width: 100%;
-            padding: 25px;
-            margin: 12px 0;
-            border: 3px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            border-radius: 18px;
-            font-size: 20px;
-            font-weight: 900;
-            cursor: pointer;
-            transition: 0.3s;
+            width: 100%; padding: 25px; margin: 12px 0; border: 3px solid var(--primary);
+            background: transparent; color: var(--primary); border-radius: 18px;
+            font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s;
         }
         .type-select-btn:hover { background: var(--primary); color: white; }
 
         /* الطبقة 3: الاستمارة الكاملة */
         .form-container {
-            display: none;
-            max-width: 900px;
-            margin: 30px auto;
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            overflow: hidden;
-            border-top: 12px solid var(--primary);
-            animation: slideUp 0.5s ease;
+            display: none; max-width: 900px; margin: 30px auto; background: white;
+            border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); overflow: hidden;
+            border-top: 12px solid var(--primary); animation: slideUp 0.5s ease;
         }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -124,27 +74,14 @@
         
         .field-group { display: flex; flex-direction: column; text-align: right; }
         .field-group label { font-weight: 800; margin-bottom: 8px; font-size: 15px; color: #444; }
-        .field-group input, .field-group textarea {
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: 'Cairo';
-            font-size: 16px;
-        }
+        .field-group label i { color: var(--primary); margin-left: 8px; }
+        .field-group input, .field-group textarea { padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
         .field-group input:focus { border-color: var(--primary); outline: none; }
 
         .submit-btn {
-            grid-column: span 2;
-            padding: 22px;
-            background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
-            color: white;
-            border: none;
-            border-radius: 18px;
-            font-size: 22px;
-            font-weight: 900;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
+            grid-column: span 2; padding: 22px; background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+            color: white; border: none; border-radius: 18px; font-size: 22px; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
@@ -153,18 +90,21 @@
 </head>
 <body>
 
-<!-- الطبقة 1: الواجهة الرئيسية -->
-<div id="layer1" class="main-gateway">
+<div id="layer1" class="gateway-screen">
     <div class="welcome-card">
+        <div class="main-logo"><i class="fas fa-laptop"></i></div>
         <h1 style="color: var(--primary); font-size: 32px; margin-bottom: 10px;">البوابة الرقمية 💻</h1>
         <p style="color: #666; margin-bottom: 40px;">أهلاً بك، يرجى اختيار الوجهة المرجوة للمتابعة</p>
         
-        <button class="gateway-btn btn-blue" onclick="showLayer2()">بوابة التسجيلات الإلكترونية 📝</button>
-        <a href="admin.html" class="gateway-btn btn-dark">لوحة إدارة الطلبات (الأدمن) 🔐</a>
+        <button class="nav-btn btn-blue" onclick="showLayer2()">
+            <i class="fas fa-edit"></i> بوابة التسجيلات الإلكترونية
+        </button>
+        <a href="admin.html" class="nav-btn btn-dark">
+            <i class="fas fa-lock"></i> لوحة إدارة الطلبات (الأدمن)
+        </a>
     </div>
 </div>
 
-<!-- الطبقة 2: اختيار نوع التسجيل -->
 <div id="layer2" class="selection-overlay">
     <div class="option-box">
         <h2 style="margin-bottom: 30px;">اختر نوع الاستمارة</h2>
@@ -174,67 +114,67 @@
     </div>
 </div>
 
-<!-- الطبقة 3: الاستمارة (بكامل الحقول) -->
 <div id="layer3" class="form-container">
     <div class="form-header">
         <div id="badge" style="background:#eef2ff; color:var(--primary); padding:5px 15px; border-radius:20px; display:inline-block; font-weight:bold; margin-bottom:10px;"></div>
-        <h2 id="formTitle" style="margin:0;">تعبئة بيانات الملف</h2>
+        <h2 style="margin:0;">تعبئة بيانات الملف السحابي</h2>
     </div>
 
     <form class="form-body" id="finalForm">
         <input type="hidden" id="serviceType">
 
-        <!-- حقول المراسلة (Mora) - تم استعادتها بالكامل -->
         <div class="field-group full-col mora-fields">
-            <label>الاسم واللقب الكامل (بالعربية)</label>
+            <label><i class="fas fa-user"></i> الاسم واللقب الكامل (بالعربية)</label>
             <input type="text" id="moraFullNameAr" placeholder="أدخل اسمك الكامل">
         </div>
         <div class="field-group mora-fields">
-            <label>رقم الاستمارة</label>
+            <label><i class="fas fa-file-alt"></i> رقم الاستمارة</label>
             <input type="number" id="moraFormId" placeholder="رقم التسجيل">
         </div>
         <div class="field-group mora-fields">
-            <label>المستوى الدراسي</label>
+            <label><i class="fas fa-layer-group"></i> المستوى الدراسي</label>
             <input type="text" id="moraLevel" placeholder="مثال: ثالثة ثانوي">
         </div>
         <div class="field-group mora-fields">
-            <label>اسم المستخدم (Username)</label>
+            <label><i class="fas fa-id-badge"></i> اسم المستخدم (Username)</label>
             <input type="text" id="moraUsername" placeholder="اسم المستخدم">
         </div>
         <div class="field-group mora-fields">
-            <label>كلمة المرور (Password)</label>
+            <label><i class="fas fa-key"></i> كلمة المرور (Password)</label>
             <input type="text" id="moraPassword" placeholder="كلمة المرور">
         </div>
+        <div class="field-group full-col mora-fields">
+            <label><i class="fas fa-link"></i> رابط الملف أو رابط خارجي 🔗</label>
+            <input type="url" id="linkField" style="direction: ltr;" placeholder="https://example.com/file.pdf">
+        </div>
 
-        <!-- حقول البطالة (Bata) - تم استعادتها بالكامل -->
         <div class="field-group full-col bata-fields">
-            <label>الاسم واللقب بالفرنسية (NOM ET PRENOM)</label>
+            <label><i class="fas fa-language"></i> الاسم واللقب بالفرنسية (NOM ET PRENOM)</label>
             <input type="text" id="bataNameFr" style="direction: ltr;" placeholder="MOHAMED ALGERI">
         </div>
         <div class="field-group bata-fields">
-            <label>رقم التعريف الوطني (NIN)</label>
+            <label><i class="fas fa-id-card"></i> رقم التعريف الوطني (NIN)</label>
             <input type="number" id="bataNin" placeholder="18 رقم">
         </div>
         <div class="field-group bata-fields">
-            <label>رقم الهاتف</label>
+            <label><i class="fas fa-phone"></i> رقم الهاتف</label>
             <input type="tel" id="bataPhone" placeholder="06 / 07 / 05">
         </div>
         <div class="field-group bata-fields">
-            <label>رقم الحساب البريدي (RIP)</label>
+            <label><i class="fas fa-money-check"></i> رقم الحساب البريدي (RIP)</label>
             <input type="text" id="bataRip" placeholder="رقم الشيك البريدي">
         </div>
         <div class="field-group bata-fields">
-            <label>رقم بطاقة طالب العمل</label>
+            <label><i class="fas fa-briefcase"></i> رقم بطاقة طالب العمل</label>
             <input type="text" id="bataAnemId" placeholder="رقم التسجيل في ANEM">
         </div>
 
-        <!-- حقل مشترك -->
         <div class="field-group full-col">
-            <label>ملاحظات إضافية (اختياري)</label>
+            <label><i class="fas fa-comment"></i> ملاحظات إضافية (اختياري)</label>
             <textarea id="finalNotes" rows="3" placeholder="أي معلومات أخرى..."></textarea>
         </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">إرسال البيانات للسحابة ✅</button>
+        <button type="submit" class="submit-btn" id="submitBtn"><i class="fas fa-cloud-upload-alt"></i> إرسال البيانات للسحابة ✅</button>
         <div class="full-col" style="text-align: center; margin-top: 15px; cursor: pointer; color: #888;" onclick="location.reload()">⬅️ العودة للبداية</div>
     </form>
 </div>
@@ -255,53 +195,43 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // الانتقال لطبقة الاختيار
     window.showLayer2 = () => {
         document.getElementById('layer1').style.display = 'none';
         document.getElementById('layer2').style.display = 'flex';
     };
 
-    // الانتقال للاستمارة وإظهار الحقول المناسبة
     window.showLayer3 = (type) => {
         document.getElementById('layer2').style.display = 'none';
         document.getElementById('layer3').style.display = 'block';
         document.getElementById('serviceType').value = type;
-        document.getElementById('badge').innerText = "الخدمة: " + type;
-
+        document.getElementById('badge').innerText = "الخدمة المختار: " + type;
         const mora = document.querySelectorAll('.mora-fields');
         const bata = document.querySelectorAll('.bata-fields');
-
         if(type === 'مراسلة') {
-            mora.forEach(f => f.style.display = 'flex');
-            bata.forEach(f => f.style.display = 'none');
+            mora.forEach(f => f.style.display = 'flex'); bata.forEach(f => f.style.display = 'none');
         } else {
-            mora.forEach(f => f.style.display = 'none');
-            bata.forEach(f => f.style.display = 'flex');
+            mora.forEach(f => f.style.display = 'none'); bata.forEach(f => f.style.display = 'flex');
         }
     };
 
-    // معالجة الإرسال
     document.getElementById('finalForm').onsubmit = async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "جاري الاتصال بالسحابة... ⏳";
+        const btn = document.getElementById('submitBtn'); btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
 
         const type = document.getElementById('serviceType').value;
         const data = {
-            serviceType: type,
-            status: 'قيد الانتظار',
-            createdAt: new Date().toISOString(),
+            serviceType: type, status: 'قيد الانتظار', createdAt: new Date().toISOString(),
             notes: document.getElementById('finalNotes').value
         };
 
-        // تجميع كل البيانات بناءً على النوع
         if(type === 'مراسلة') {
             data.fullName = document.getElementById('moraFullNameAr').value;
             data.formId = document.getElementById('moraFormId').value;
             data.level = document.getElementById('moraLevel').value;
             data.username = document.getElementById('moraUsername').value;
             data.password = document.getElementById('moraPassword').value;
+            data.externalLink = document.getElementById('linkField').value;
         } else {
             data.nameFr = document.getElementById('bataNameFr').value;
             data.nin = document.getElementById('bataNin').value;
@@ -312,15 +242,9 @@
 
         try {
             await addDoc(collection(db, "registrations"), data);
-            alert("تم إرسال بياناتك بنجاح! ✅");
-            location.reload();
-        } catch(err) {
-            alert("خطأ في الإرسال ❌");
-            btn.disabled = false;
-            btn.innerText = "إعادة المحاولة";
-        }
+            alert("✅ تم إرسال بياناتك بنجاح!"); location.reload();
+        } catch(err) { alert("❌ خطأ في الإرسال"); btn.disabled = false; btn.innerText = "إعادة المحاولة"; }
     };
 </script>
-
 </body>
 </html>
