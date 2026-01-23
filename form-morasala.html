@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل المراسلة - سوبير إعلام آلي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #4e73df; --success: #1cc88a; --bg: #f8f9fc; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
+        
+        .header { 
+            background: var(--primary); 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .admin-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-link:hover { background: white; color: var(--primary); }
+
+        .form-container {
+            max-width: 800px; margin: 30px auto; background: white;
+            border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow: hidden; border-top: 10px solid var(--primary);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-body { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-col { grid-column: span 2; }
+        
+        .field-group { display: flex; flex-direction: column; text-align: right; }
+        .field-group label { font-weight: 700; margin-bottom: 8px; font-size: 15px; color: #333; }
+        .field-group label i { color: var(--primary); margin-left: 8px; }
+        .field-group input, .field-group textarea, .field-group select { 
+            padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            font-family: 'Cairo'; font-size: 16px; transition: 0.3s;
+        }
+        .field-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(78,115,223,0.2); }
+
+        .submit-btn {
+            grid-column: span 2; padding: 18px; background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+            color: white; border: none; border-radius: 15px; font-size: 20px; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(78,115,223,0.3); }
+        
+        .back-link { text-align: center; margin: 20px 0 40px; display: block; color: #888; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2><i class="fas fa-graduation-cap"></i> تسجيل المراسلة (ONEFD)</h2>
+    <a href="admin-morasala.html" class="admin-link">
+        <i class="fas fa-user-shield"></i> لوحة التحكم
+    </a>
+</div>
+
+<div class="form-container">
+    <form class="form-body" id="moraForm">
+        <div class="field-group full-col">
+            <label><i class="fas fa-user"></i> الاسم واللقب الكامل (بالعربية)</label>
+            <input type="text" id="fullName" placeholder="أدخل اسمك الثلاثي" required>
+        </div>
+
+        <div class="field-group">
+            <label><i class="fas fa-file-invoice"></i> رقم الاستمارة</label>
+            <input type="text" id="formId" placeholder="رقم التسجيل" required>
+        </div>
+
+        <div class="field-group">
+            <label><i class="fas fa-layer-group"></i> المستوى الدراسي</label>
+            <input type="text" id="level" placeholder="مثال: 3 ثانوي / 4 متوسط" required>
+        </div>
+
+        <div class="field-group">
+            <label><i class="fas fa-calendar-alt"></i> تاريخ الازدياد</label>
+            <input type="date" id="birthDate" required>
+        </div>
+
+        <div class="field-group">
+            <label><i class="fas fa-id-badge"></i> اسم المستخدم (Username)</label>
+            <input type="text" id="username" placeholder="اسم المستخدم" required>
+        </div>
+
+        <div class="field-group">
+            <label><i class="fas fa-key"></i> كلمة المرور (Password)</label>
+            <input type="text" id="password" placeholder="كلمة المرور" required>
+        </div>
+
+        <div class="field-group full-col">
+            <label><i class="fas fa-link"></i> رابط الملف (إن وجد)</label>
+            <input type="url" id="externalLink" style="direction: ltr;" placeholder="https://example.com/file.pdf">
+        </div>
+
+        <div class="field-group full-col">
+            <label><i class="fas fa-sticky-note"></i> ملاحظات إضافية</label>
+            <textarea id="notes" rows="3" placeholder="أدخل أي معلومات إضافية..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+            <i class="fas fa-cloud-upload-alt"></i> إرسال البيانات للسحابة ✅
+        </button>
+    </form>
+</div>
+
+<a href="index.html" class="back-link">⬅️ العودة للرئيسية</a>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8",
+        authDomain: "batalaonefd.firebaseapp.com",
+        projectId: "batalaonefd",
+        storageBucket: "batalaonefd.firebasestorage.app",
+        messagingSenderId: "346007854663",
+        appId: "1:346007854663:web:2d508e74c073061ee31b62"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById('moraForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+        const data = {
+            serviceType: 'مراسلة',
+            status: 'قيد الانتظار ⏳',
+            createdAt: new Date().toISOString(),
+            fullName: document.getElementById('fullName').value,
+            formId: document.getElementById('formId').value,
+            level: document.getElementById('level').value, // تم إضافة الحقل هنا
+            birthDate: document.getElementById('birthDate').value,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            externalLink: document.getElementById('externalLink').value,
+            notes: document.getElementById('notes').value
+        };
+
+        try {
+            await addDoc(collection(db, "registrations"), data);
+            alert("✅ تم إرسال ملف المراسلة بنجاح!");
+            location.reload();
+        } catch(err) {
+            alert("❌ خطأ في الإرسال");
+            btn.disabled = false;
+            btn.innerText = "إعادة المحاولة";
+        }
+    };
+</script>
+</body>
+</html>

@@ -3,248 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البوابة الرقمية - سوبير إعلام آلي</title>
+    <title>بوابة الإدارة الاحترافية - سوبير إعلام آلي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4e73df; --success: #1cc88a; --dark: #2d3436; --bg: #f8f9fc;
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --dark: #2d3436;
+            --bg: #f0f2f5;
+            --white: #ffffff;
         }
 
         body {
-            font-family: 'Cairo', sans-serif; background-color: var(--bg);
-            margin: 0; direction: rtl;
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--dark);
         }
 
-        /* الطبقة 1: الواجهة الرئيسية (كما في الصور) */
-        .gateway-screen {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #cfd9df 100%);
+        /* حاوية الواجهة الرئيسية */
+        .admin-dashboard {
+            background: var(--white);
+            width: 95%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .welcome-card {
-            background: white; padding: 50px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            text-align: center; max-width: 550px; width: 90%; border-top: 10px solid var(--primary);
+        /* خط زخرفي علوي */
+        .admin-dashboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
         }
 
-        .main-logo {
-            width: 100px; height: 100px; background: var(--primary); color: white;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 50px; margin: 0 auto 20px; box-shadow: 0 10px 20px rgba(78,115,223,0.3);
+        .header-section {
+            margin-bottom: 35px;
         }
 
-        .nav-btn {
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            width: 100%; padding: 22px; margin: 15px 0; border: none; border-radius: 15px;
-            font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.3s;
-            text-decoration: none; font-family: 'Cairo';
+        .header-section i {
+            background: #f8f9fc;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 50%;
+            color: var(--primary);
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(78,115,223,0.1);
         }
 
-        .btn-blue { background: var(--primary); color: white; }
-        .btn-dark { background: var(--dark); color: white; }
-        .nav-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-
-        /* الطبقة 2: اختيار النوع */
-        .selection-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        .header-section h2 {
+            font-weight: 900;
+            font-size: 28px;
+            margin: 0;
+            color: var(--dark);
         }
 
-        .option-box { background: white; padding: 40px; border-radius: 25px; width: 90%; max-width: 500px; text-align: center; }
-
-        .type-select-btn {
-            width: 100%; padding: 25px; margin: 12px 0; border: 3px solid var(--primary);
-            background: transparent; color: var(--primary); border-radius: 18px;
-            font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s;
-        }
-        .type-select-btn:hover { background: var(--primary); color: white; }
-
-        /* الطبقة 3: الاستمارة الكاملة */
-        .form-container {
-            display: none; max-width: 900px; margin: 30px auto; background: white;
-            border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); overflow: hidden;
-            border-top: 12px solid var(--primary); animation: slideUp 0.5s ease;
+        .header-section p {
+            color: #777;
+            font-size: 16px;
         }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .form-header { padding: 30px; background: #fcfcfc; border-bottom: 1px solid #eee; text-align: center; }
-        .form-body { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .full-col { grid-column: span 2; }
-        
-        .field-group { display: flex; flex-direction: column; text-align: right; }
-        .field-group label { font-weight: 800; margin-bottom: 8px; font-size: 15px; color: #444; }
-        .field-group label i { color: var(--primary); margin-left: 8px; }
-        .field-group input, .field-group textarea { padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
-        .field-group input:focus { border-color: var(--primary); outline: none; }
-
-        .submit-btn {
-            grid-column: span 2; padding: 22px; background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
-            color: white; border: none; border-radius: 18px; font-size: 22px; font-weight: 900;
-            cursor: pointer; transition: 0.3s; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;
+        /* نظام الكروت (Buttons) */
+        .grid-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        .submit-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-        @media (max-width: 768px) { .form-body { grid-template-columns: 1fr; } .full-col { grid-column: span 1; } }
+        .nav-card {
+            background: var(--white);
+            border: 2px solid #edf2f7;
+            padding: 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .nav-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        .nav-card span {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-card .badge {
+            font-size: 12px;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        /* زر العودة */
+        .footer-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: #888;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        /* تنسيق خاص للطباعة */
+        @media print {
+            body { background: white; }
+            .admin-dashboard { box-shadow: none; border: 1px solid #ddd; }
+            .nav-card:hover { transform: none; }
+        }
+
+        @media (max-width: 600px) {
+            .grid-links { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div id="layer1" class="gateway-screen">
-    <div class="welcome-card">
-        <div class="main-logo"><i class="fas fa-laptop"></i></div>
-        <h1 style="color: var(--primary); font-size: 32px; margin-bottom: 10px;">البوابة الرقمية 💻</h1>
-        <p style="color: #666; margin-bottom: 40px;">أهلاً بك، يرجى اختيار الوجهة المرجوة للمتابعة</p>
-        
-        <button class="nav-btn btn-blue" onclick="showLayer2()">
-            <i class="fas fa-edit"></i> بوابة التسجيلات الإلكترونية
-        </button>
-        <a href="admin.html" class="nav-btn btn-dark">
-            <i class="fas fa-lock"></i> لوحة إدارة الطلبات (الأدمن)
+    <div class="admin-dashboard">
+        <div class="header-section">
+            <i class="fas fa-user-shield fa-2x"></i>
+            <h2>بوابة التحكم المركزية 🔒</h2>
+            <p>مرحباً بك في لوحة الإدارة السحابية - سوبير إعلام آلي</p>
+        </div>
+
+        <div class="grid-links">
+            <a href="form-morasala.html" class="nav-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNAUyxIcXbp_YvkBbIwde2mFtUWXhmmGcUmg&s" alt="ONEFD">
+                <span>تسجيلات  مراسلة</span>
+                <div class="badge">تسجيلات  مراسلة</div>
+            </a>
+
+            <a href="form-batala.html" class="nav-card">
+                <img src="https://img.sur.ly/favicons/a/anem.dz.ico" alt="ANEM">
+                <span>تسجيلات لبطالة</span>
+                <div class="badge">تسجيلات البطالة</div>
+            </a>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <a href="index.html" class="footer-link">
+            <i class="fas fa-sign-out-alt"></i> الخروج والعودة لصفحة التسجيل
         </a>
     </div>
-</div>
 
-<div id="layer2" class="selection-overlay">
-    <div class="option-box">
-        <h2 style="margin-bottom: 30px;">اختر نوع الاستمارة</h2>
-        <button class="type-select-btn" onclick="showLayer3('مراسلة')">تسجيلات المراسلة (ONEFD)</button>
-        <button class="type-select-btn" onclick="showLayer3('بطالة')">منحة البطالة (ANEM)</button>
-        <div style="margin-top: 25px; cursor: pointer; color: #e74a3b; font-weight: bold;" onclick="location.reload()">❌ إلغاء والعودة</div>
-    </div>
-</div>
-
-<div id="layer3" class="form-container">
-    <div class="form-header">
-        <div id="badge" style="background:#eef2ff; color:var(--primary); padding:5px 15px; border-radius:20px; display:inline-block; font-weight:bold; margin-bottom:10px;"></div>
-        <h2 style="margin:0;">تعبئة بيانات الملف السحابي</h2>
-    </div>
-
-    <form class="form-body" id="finalForm">
-        <input type="hidden" id="serviceType">
-
-        <div class="field-group full-col mora-fields">
-            <label><i class="fas fa-user"></i> الاسم واللقب الكامل (بالعربية)</label>
-            <input type="text" id="moraFullNameAr" placeholder="أدخل اسمك الكامل">
-        </div>
-        <div class="field-group mora-fields">
-            <label><i class="fas fa-file-alt"></i> رقم الاستمارة</label>
-            <input type="number" id="moraFormId" placeholder="رقم التسجيل">
-        </div>
-        <div class="field-group mora-fields">
-            <label><i class="fas fa-layer-group"></i> المستوى الدراسي</label>
-            <input type="text" id="moraLevel" placeholder="مثال: ثالثة ثانوي">
-        </div>
-        <div class="field-group mora-fields">
-            <label><i class="fas fa-id-badge"></i> اسم المستخدم (Username)</label>
-            <input type="text" id="moraUsername" placeholder="اسم المستخدم">
-        </div>
-        <div class="field-group mora-fields">
-            <label><i class="fas fa-key"></i> كلمة المرور (Password)</label>
-            <input type="text" id="moraPassword" placeholder="كلمة المرور">
-        </div>
-        <div class="field-group full-col mora-fields">
-            <label><i class="fas fa-link"></i> رابط الملف أو رابط خارجي 🔗</label>
-            <input type="url" id="linkField" style="direction: ltr;" placeholder="https://example.com/file.pdf">
-        </div>
-
-        <div class="field-group full-col bata-fields">
-            <label><i class="fas fa-language"></i> الاسم واللقب بالفرنسية (NOM ET PRENOM)</label>
-            <input type="text" id="bataNameFr" style="direction: ltr;" placeholder="MOHAMED ALGERI">
-        </div>
-        <div class="field-group bata-fields">
-            <label><i class="fas fa-id-card"></i> رقم التعريف الوطني (NIN)</label>
-            <input type="number" id="bataNin" placeholder="18 رقم">
-        </div>
-        <div class="field-group bata-fields">
-            <label><i class="fas fa-phone"></i> رقم الهاتف</label>
-            <input type="tel" id="bataPhone" placeholder="06 / 07 / 05">
-        </div>
-        <div class="field-group bata-fields">
-            <label><i class="fas fa-money-check"></i> رقم الحساب البريدي (RIP)</label>
-            <input type="text" id="bataRip" placeholder="رقم الشيك البريدي">
-        </div>
-        <div class="field-group bata-fields">
-            <label><i class="fas fa-briefcase"></i> رقم بطاقة طالب العمل</label>
-            <input type="text" id="bataAnemId" placeholder="رقم التسجيل في ANEM">
-        </div>
-
-        <div class="field-group full-col">
-            <label><i class="fas fa-comment"></i> ملاحظات إضافية (اختياري)</label>
-            <textarea id="finalNotes" rows="3" placeholder="أي معلومات أخرى..."></textarea>
-        </div>
-
-        <button type="submit" class="submit-btn" id="submitBtn"><i class="fas fa-cloud-upload-alt"></i> إرسال البيانات للسحابة ✅</button>
-        <div class="full-col" style="text-align: center; margin-top: 15px; cursor: pointer; color: #888;" onclick="location.reload()">⬅️ العودة للبداية</div>
-    </form>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8",
-        authDomain: "batalaonefd.firebaseapp.com",
-        projectId: "batalaonefd",
-        storageBucket: "batalaonefd.firebasestorage.app",
-        messagingSenderId: "346007854663",
-        appId: "1:346007854663:web:2d508e74c073061ee31b62"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.showLayer2 = () => {
-        document.getElementById('layer1').style.display = 'none';
-        document.getElementById('layer2').style.display = 'flex';
-    };
-
-    window.showLayer3 = (type) => {
-        document.getElementById('layer2').style.display = 'none';
-        document.getElementById('layer3').style.display = 'block';
-        document.getElementById('serviceType').value = type;
-        document.getElementById('badge').innerText = "الخدمة المختار: " + type;
-        const mora = document.querySelectorAll('.mora-fields');
-        const bata = document.querySelectorAll('.bata-fields');
-        if(type === 'مراسلة') {
-            mora.forEach(f => f.style.display = 'flex'); bata.forEach(f => f.style.display = 'none');
-        } else {
-            mora.forEach(f => f.style.display = 'none'); bata.forEach(f => f.style.display = 'flex');
-        }
-    };
-
-    document.getElementById('finalForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn'); btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
-
-        const type = document.getElementById('serviceType').value;
-        const data = {
-            serviceType: type, status: 'قيد الانتظار', createdAt: new Date().toISOString(),
-            notes: document.getElementById('finalNotes').value
-        };
-
-        if(type === 'مراسلة') {
-            data.fullName = document.getElementById('moraFullNameAr').value;
-            data.formId = document.getElementById('moraFormId').value;
-            data.level = document.getElementById('moraLevel').value;
-            data.username = document.getElementById('moraUsername').value;
-            data.password = document.getElementById('moraPassword').value;
-            data.externalLink = document.getElementById('linkField').value;
-        } else {
-            data.nameFr = document.getElementById('bataNameFr').value;
-            data.nin = document.getElementById('bataNin').value;
-            data.phone = document.getElementById('bataPhone').value;
-            data.rip = document.getElementById('bataRip').value;
-            data.anemId = document.getElementById('bataAnemId').value;
-        }
-
-        try {
-            await addDoc(collection(db, "registrations"), data);
-            alert("✅ تم إرسال بياناتك بنجاح!"); location.reload();
-        } catch(err) { alert("❌ خطأ في الإرسال"); btn.disabled = false; btn.innerText = "إعادة المحاولة"; }
-    };
-</script>
 </body>
 </html>

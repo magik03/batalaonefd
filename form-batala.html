@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل منحة البطالة - سوبير إعلام آلي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1cc88a; --bg: #f8f9fc; --dark: #2d3436; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
+        
+        /* الهيدر المطور مع الأزرار */
+        .header { 
+            background: var(--primary); 
+            color: white; 
+            padding: 15px 30px; 
+            text-align: center; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header h2 { margin: 0; font-size: 20px; flex-grow: 1; text-align: right; }
+        
+        .nav-links { display: flex; gap: 10px; }
+        
+        .header-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .header-btn:hover { background: white; color: var(--primary); }
+        .btn-admin { background: var(--dark); }
+        .btn-admin:hover { background: #000; color: white; }
+
+        .form-container { max-width: 800px; margin: 30px auto; background: white; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
+        .form-body { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-col { grid-column: span 2; }
+        .field-group { display: flex; flex-direction: column; }
+        .field-group label { font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+        .field-group input, .field-group textarea { padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; outline: none; }
+        .field-group input:focus { border-color: var(--primary); }
+        
+        .submit-btn { grid-column: span 2; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 15px; font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+        .submit-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2><i class="fas fa-briefcase"></i> استمارة منحة البطالة</h2>
+    
+    <div class="nav-links">
+        <a href="admin-batala.html" class="header-btn btn-admin">
+            <i class="fas fa-user-shield"></i> لوحة الإدارة
+        </a>
+        <a href="index.html" class="header-btn">
+            الرئيسية <i class="fas fa-home"></i>
+        </a>
+    </div>
+</div>
+
+<div class="form-container">
+    <form class="form-body" id="bataForm">
+        <div class="field-group">
+            <label>رقم بطاقة طالب العمل (12 رقم)</label>
+            <input type="text" id="anemId" maxlength="12" placeholder="000000000000" required>
+        </div>
+
+        <div class="field-group">
+            <label>رقم التعريف الوطني (NIN) (18 رقم)</label>
+            <input type="text" id="nin" maxlength="18" placeholder="000000000000000000" required>
+        </div>
+
+        <div class="field-group full-col">
+            <label>الاسم واللقب بالفرنسية (أحرف كبيرة فقط)</label>
+            <input type="text" id="nameFr" style="text-transform: uppercase;" placeholder="NOM ET PRENOM" required>
+        </div>
+
+        <div class="field-group">
+            <label>رقم الحساب البريدي (RIP)</label>
+            <input type="text" id="rip" maxlength="13" placeholder="0045020149 52" required style="direction: ltr; text-align: right;">
+        </div>
+
+        <div class="field-group">
+            <label>رقم الهاتف (يبدأ بـ 05/06/07)</label>
+            <input type="tel" id="phone" maxlength="10" placeholder="0664526325" required>
+        </div>
+
+        <div class="field-group full-col">
+            <label>ملاحظات إضافية</label>
+            <textarea id="notes" rows="3" style="padding:10px; border-radius:10px; border:2px solid #e2e8f0;"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">إرسال البيانات ✅</button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8", 
+        authDomain: "batalaonefd.firebaseapp.com", 
+        projectId: "batalaonefd", 
+        storageBucket: "batalaonefd.firebasestorage.app", 
+        messagingSenderId: "346007854663", 
+        appId: "1:346007854663:web:2d508e74c073061ee31b62" 
+    };
+    
+    const app = initializeApp(firebaseConfig); 
+    const db = getFirestore(app);
+
+    // قيود الإدخال
+    document.getElementById('nameFr').addEventListener('input', e => e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase());
+    document.getElementById('anemId').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+    document.getElementById('nin').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+    document.getElementById('rip').addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 10) v = v.substring(0, 10) + " " + v.substring(10, 12);
+        e.target.value = v;
+    });
+
+    document.getElementById('bataForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('phone').value;
+        if (!/^(05|06|07)\d{8}$/.test(phone)) return alert("رقم الهاتف غير صحيح!");
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+        
+        try {
+            await addDoc(collection(db, "registrations"), {
+                serviceType: 'بطالة', 
+                status: 'قيد الانتظار ⏳', 
+                createdAt: new Date().toISOString(),
+                anemId: document.getElementById('anemId').value,
+                nin: document.getElementById('nin').value,
+                nameFr: document.getElementById('nameFr').value,
+                rip: document.getElementById('rip').value,
+                phone: phone, 
+                notes: document.getElementById('notes').value
+            });
+            alert("✅ تم إرسال بياناتك بنجاح!"); 
+            location.reload();
+        } catch (error) {
+            alert("❌ حدث خطأ أثناء الإرسال، حاول مجدداً.");
+            btn.disabled = false;
+            btn.innerText = "إرسال البيانات ✅";
+        }
+    };
+</script>
+</body>
+</html>
