@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة الحج والعمرة - لوحة التحكم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a1a1a; --accent: #d4af37; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; direction: rtl; }
+        .header { background: var(--primary); color: white; padding: 25px 45px; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--accent); }
+        .search-container { padding: 25px 45px; background: white; display: flex; gap: 15px; }
+        .search-input { flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; }
+        .table-container { padding: 30px 45px; overflow-x: auto; }
+        table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 15px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; color: var(--primary); font-weight: 900; }
+        td.group-col { font-weight: bold; color: var(--accent); background-color: #fdfdfd; }
+        .status-pill { padding: 6px 15px; border-radius: 50px; font-size: 12px; font-weight: 900; display: inline-block; }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .status-danger { background: #f8d7da; color: #721c24; }
+        .comp-badge { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
+        .comp-yes { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+        .comp-no { background: #f5f5f5; color: #777; }
+        
+        /* Modal */
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center; }
+        .modal-content { background:white; padding:35px; border-radius:15px; width:90%; max-width:800px; border-left: 8px solid var(--accent); max-height: 90vh; overflow-y: auto; }
+        .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .editor-grid input, .editor-grid select, .editor-grid textarea { padding: 12px; border: 1.5px solid #ccc; border-radius: 8px; font-family: 'Cairo'; width: 100%; box-sizing: border-box; }
+        .section-header { grid-column: span 2; margin-top: 15px; padding-bottom: 5px; border-bottom: 2px dashed #eee; color: var(--accent); font-weight: bold; }
+        .opt-btn { padding: 12px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; font-weight: bold; flex: 1; transition: 0.3s; }
+        .active { border-color: black; transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-action { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div id="adminContent">
+    <div class="header">
+        <h2><i class="fas fa-users-cog"></i> إدارة تسجيلات الحج والعمرة</h2>
+        <a href="index.html" style="background:var(--accent); color:var(--primary); padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:900;">الرئيسية</a>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." onkeyup="filterTable()">
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>المجموعة</th>
+                    <th>الاسم واللقب</th>
+                    <th>مرافق؟</th>
+                    <th>ملاحظات</th> <!-- تمت الإضافة -->
+                    <th>رقم الجواز</th>
+                    <th>رقم الدفع</th>
+                    <th>الهاتف</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="tBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-edit"></i> تعديل بيانات الحاج/المعتمر</h3>
+        <div id="editor" class="editor-grid">
+            
+            <div class="section-header">👤 بيانات مقدم الطلب</div>
+            <div><label>اللقب:</label><input type="text" id="edit_lastName"></div>
+            <div><label>الاسم:</label><input type="text" id="edit_firstName"></div>
+            <div><label>رقم الجواز:</label><input type="text" id="edit_passportNum" maxlength="9"></div>
+            <div><label>رقم الدفع:</label><input type="text" id="edit_paymentNum"></div>
+            <div><label>الهاتف:</label><input type="text" id="edit_phone"></div>
+            <div><label>المجموعة:</label><input type="text" id="edit_groupName"></div>
+
+            <!-- خانة تعديل الملاحظات -->
+            <div style="grid-column: span 2;">
+                <label>ملاحظات:</label>
+                <textarea id="edit_notes" rows="2" style="width:100%"></textarea>
+            </div>
+
+            <div id="comp_section" style="display:contents;">
+                <div class="section-header">👥 بيانات المرافق</div>
+                <div><label>لقب المرافق:</label><input type="text" id="edit_comp_lastName"></div>
+                <div><label>اسم المرافق:</label><input type="text" id="edit_comp_firstName"></div>
+                <div><label>جواز المرافق:</label><input type="text" id="edit_comp_passportNum" maxlength="9"></div>
+                <div><label>دفع المرافق:</label><input type="text" id="edit_comp_paymentNum"></div>
+            </div>
+
+            <div class="section-header">⚙️ حالة الطلب</div>
+            <div style="grid-column: span 2;">
+                <div style="display:flex; gap:10px; margin-top:5px;">
+                    <button class="opt-btn" style="background:var(--success); color:white" onclick="setStatus('تم التأكيد ✅')">تأكيد ✅</button>
+                    <button class="opt-btn" style="background:var(--warning)" onclick="setStatus('غير مؤكد ⏳')">انتظار ⏳</button>
+                    <button class="opt-btn" style="background:var(--danger); color:white" onclick="setStatus('ملغى ❌')">إلغاء ❌</button>
+                </div>
+            </div>
+        </div>
+        
+        <input type="hidden" id="selectedStatus">
+        <input type="hidden" id="hasCompFlag">
+        
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button onclick="saveChanges()" style="flex:2; padding:16px; background:var(--primary); color:var(--accent); border:none; border-radius:10px; cursor:pointer; font-weight:bold;">حفظ التعديلات</button>
+            <button onclick="closeModal()" style="flex:1; padding:16px; background:#eee; border:none; border-radius:10px; cursor:pointer;">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD77gThYcLxvDGXBCLuhmuH_uL0R9vuXyk",
+      authDomain: "hassanaboutaha.firebaseapp.com",
+      projectId: "hassanaboutaha",
+      storageBucket: "hassanaboutaha.firebasestorage.app",
+      messagingSenderId: "636660798298",
+      appId: "1:636660798298:web:9dbe0937ec943fecc15963"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const COLLECTION_NAME = "hajj_umrah_new";
+
+    listenData();
+    let master = []; 
+    let curId = "";
+    
+    function listenData() {
+        onSnapshot(collection(db, COLLECTION_NAME), snap => {
+            master = [];
+            const tbody = document.getElementById('tBody');
+            tbody.innerHTML = "";
+            
+            snap.forEach(d => { master.push({id: d.id, ...d.data()}); });
+
+            master.sort((a, b) => {
+                const groupA = (a.groupName || "").toString();
+                const groupB = (b.groupName || "").toString();
+                if (groupA === groupB) return (a.lastName || "").localeCompare(b.lastName || "", 'ar');
+                return groupA.localeCompare(groupB, 'ar');
+            });
+
+            master.forEach(data => {
+                let sClass = data.fileStatus?.includes('تأكيد') ? 'status-success' : data.fileStatus?.includes('ملغى') ? 'status-danger' : 'status-warning';
+                let compBadge = data.hasCompanion ? `<span class="comp-badge comp-yes">نعم ✅</span>` : `<span class="comp-badge comp-no">لا 👤</span>`;
+                
+                // عرض الملاحظات في الجدول (قص النص إذا كان طويلاً)
+                let noteText = data.notes ? data.notes.substring(0, 20) + (data.notes.length > 20 ? "..." : "") : "-";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="group-col">${data.groupName}</td>
+                        <td style="font-weight:bold">${data.lastName} ${data.firstName}</td>
+                        <td>${compBadge}</td>
+                        <td style="font-size:12px; color:#555;">${noteText}</td> <!-- عمود الملاحظات -->
+                        <td>${data.passportNum}</td>
+                        <td>${data.paymentNum}</td>
+                        <td>${data.phone}</td>
+                        <td><span class="status-pill ${sClass}">${data.fileStatus || 'انتظار'}</span></td>
+                        <td>
+                            <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-action" style="background:var(--danger)" onclick="deleteEntry('${data.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        });
+    }
+
+    window.openEdit = (id) => {
+        curId = id; 
+        const item = master.find(i => i.id === id);
+        
+        document.getElementById('edit_firstName').value = item.firstName;
+        document.getElementById('edit_lastName').value = item.lastName;
+        document.getElementById('edit_passportNum').value = item.passportNum;
+        document.getElementById('edit_paymentNum').value = item.paymentNum;
+        document.getElementById('edit_phone').value = item.phone;
+        document.getElementById('edit_groupName').value = item.groupName;
+        document.getElementById('edit_notes').value = item.notes || ""; // جلب الملاحظات
+
+        const compSection = document.getElementById('comp_section');
+        const hasCompInput = document.getElementById('hasCompFlag');
+        
+        if (item.hasCompanion) {
+            hasCompInput.value = "true";
+            compSection.style.display = 'contents'; 
+            document.getElementById('edit_comp_firstName').value = item.comp_firstName || "";
+            document.getElementById('edit_comp_lastName').value = item.comp_lastName || "";
+            document.getElementById('edit_comp_passportNum').value = item.comp_passportNum || "";
+            document.getElementById('edit_comp_paymentNum').value = item.comp_paymentNum || "";
+        } else {
+            hasCompInput.value = "false";
+            compSection.style.display = 'none';
+        }
+
+        setStatus(item.fileStatus || 'غير مؤكد ⏳');
+        document.getElementById('editModal').style.display = 'flex';
+    };
+
+    window.setStatus = (s) => {
+        document.getElementById('selectedStatus').value = s;
+        document.querySelectorAll('.opt-btn').forEach(b => {
+            b.classList.remove('active');
+            if(b.innerText.includes(s.split(' ')[0])) b.classList.add('active');
+        });
+    };
+
+    window.saveChanges = async () => {
+        const ref = doc(db, COLLECTION_NAME, curId);
+        const hasComp = document.getElementById('hasCompFlag').value === "true";
+        
+        const updatedData = {
+            firstName: document.getElementById('edit_firstName').value,
+            lastName: document.getElementById('edit_lastName').value,
+            passportNum: document.getElementById('edit_passportNum').value,
+            paymentNum: document.getElementById('edit_paymentNum').value,
+            phone: document.getElementById('edit_phone').value,
+            groupName: document.getElementById('edit_groupName').value,
+            notes: document.getElementById('edit_notes').value, // حفظ الملاحظات المعدلة
+            fileStatus: document.getElementById('selectedStatus').value
+        };
+
+        if (hasComp) {
+            updatedData.comp_firstName = document.getElementById('edit_comp_firstName').value;
+            updatedData.comp_lastName = document.getElementById('edit_comp_lastName').value;
+            updatedData.comp_passportNum = document.getElementById('edit_comp_passportNum').value;
+            updatedData.comp_paymentNum = document.getElementById('edit_comp_paymentNum').value;
+        }
+
+        await updateDoc(ref, updatedData); 
+        closeModal();
+    };
+
+    window.closeModal = () => document.getElementById('editModal').style.display = 'none';
+    window.deleteEntry = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, COLLECTION_NAME, id)); };
+    
+    window.filterTable = () => { 
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const tr = document.getElementById('tBody').getElementsByTagName('tr');
+        for (let i = 0; i < tr.length; i++) {
+            const tdText = tr[i].innerText.toLowerCase();
+            tr[i].style.display = tdText.includes(input) ? "" : "none";
+        }
+    };
+</script>
+</body>
+</html>
