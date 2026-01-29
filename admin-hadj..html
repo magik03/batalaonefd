@@ -2,17 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إدارة الحج والعمرة - لوحة التحكم</title>
+    <title>إدارة الحج والعمرة - لوحة التحكم (مفتوح)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a1a1a; --accent: #d4af37; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --info: #3498db; --bg: #f4f7f6; }
+        :root { --primary: #1a1a1a; --accent: #d4af37; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; direction: rtl; }
-        
-        /* واجهة الدخول */
-        #loginOverlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .login-card { background: white; padding: 45px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 400px; text-align: center; border-top: 10px solid var(--accent); }
-        .login-card input { width: 100%; padding: 14px; margin: 12px 0; border: 2px solid #ddd; border-radius: 8px; font-family: 'Cairo'; outline: none; }
         
         /* الهيدر والجدول */
         .header { background: var(--primary); color: white; padding: 25px 45px; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--accent); }
@@ -52,24 +47,11 @@
 </head>
 <body>
 
-<!-- شاشة الدخول -->
-<div id="loginOverlay">
-    <div class="login-card">
-        <i class="fas fa-kaaba" style="font-size: 60px; color: var(--primary); margin-bottom: 25px;"></i>
-        <h2 style="margin:0; color: var(--accent);">مشرف الحج والعمرة</h2>
-        <input type="email" id="adminEmail" placeholder="البريد الإلكتروني">
-        <input type="password" id="adminPass" placeholder="كلمة المرور">
-        <button onclick="handleLogin()" style="width:100%; padding:15px; background:var(--primary); color:var(--accent); border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">دخول للنظام 🔓</button>
-        <p id="loginError" style="color:var(--danger); display:none; margin-top:15px;">البيانات خاطئة!</p>
-    </div>
-</div>
-
-<!-- محتوى الادمن -->
-<div id="adminContent" style="display:none;">
+<!-- محتوى الادمن (يظهر مباشرة بدون تسجيل دخول) -->
+<div id="adminContent">
     <div class="header">
         <h2><i class="fas fa-users-cog"></i> إدارة تسجيلات الحج والعمرة</h2>
         <div style="display:flex; gap:12px;">
-            <button onclick="handleLogout()" class="btn-action" style="background:var(--danger)">خروج</button>
             <a href="index.html" style="background:var(--accent); color:var(--primary); padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:900;">الرئيسية</a>
         </div>
     </div>
@@ -84,7 +66,7 @@
                 <tr>
                     <th>المجموعة</th>
                     <th>الاسم واللقب</th>
-                    <th>مرافق؟</th> <!-- عمود جديد -->
+                    <th>مرافق؟</th>
                     <th>رقم الجواز</th>
                     <th>رقم الدفع</th>
                     <th>الهاتف</th>
@@ -92,7 +74,9 @@
                     <th>إجراءات</th>
                 </tr>
             </thead>
-            <tbody id="tBody"></tbody>
+            <tbody id="tBody">
+                <tr><td colspan="8">جاري تحميل البيانات...</td></tr>
+            </tbody>
         </table>
     </div>
 </div>
@@ -113,7 +97,7 @@
             <div><label>الهاتف:</label><input type="text" id="edit_phone"></div>
             <div><label>المجموعة:</label><input type="text" id="edit_groupName"></div>
 
-            <!-- بيانات المرافق (يظهر فقط إذا وجد) -->
+            <!-- بيانات المرافق -->
             <div id="comp_section" style="display:contents;">
                 <div class="section-header">👥 بيانات المرافق (الزوجة/المحرم)</div>
                 <div><label>لقب المرافق:</label><input type="text" id="edit_comp_lastName"></div>
@@ -133,7 +117,7 @@
         </div>
         
         <input type="hidden" id="selectedStatus">
-        <input type="hidden" id="hasCompFlag"> <!-- لتخزين هل يوجد مرافق أم لا -->
+        <input type="hidden" id="hasCompFlag">
         
         <div style="margin-top:20px; display:flex; gap:10px;">
             <button onclick="saveChanges()" style="flex:2; padding:16px; background:var(--primary); color:var(--accent); border:none; border-radius:10px; cursor:pointer; font-weight:bold;">حفظ التعديلات</button>
@@ -145,7 +129,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // لا حاجة لاستيراد Auth لأننا أزلنا الحماية
 
     const firebaseConfig = {
       apiKey: "AIzaSyD77gThYcLxvDGXBCLuhmuH_uL0R9vuXyk",
@@ -158,29 +143,11 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
 
     const COLLECTION_NAME = "hajj_umrah_new";
 
-    onAuthStateChanged(auth, user => {
-        if(user) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('adminContent').style.display = 'block';
-            listenData();
-        } else {
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('adminContent').style.display = 'none';
-        }
-    });
-
-    window.handleLogin = async () => {
-        const email = document.getElementById('adminEmail').value;
-        const pass = document.getElementById('adminPass').value;
-        try { await signInWithEmailAndPassword(auth, email, pass); }
-        catch(e) { document.getElementById('loginError').style.display = 'block'; }
-    };
-
-    window.handleLogout = () => signOut(auth);
+    // تشغيل جلب البيانات مباشرة عند تحميل الصفحة
+    listenData();
 
     let master = []; 
     let curId = "";
@@ -191,6 +158,11 @@
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = "";
             
+            if (snap.empty) {
+                tbody.innerHTML = "<tr><td colspan='8'>لا توجد بيانات مسجلة حالياً</td></tr>";
+                return;
+            }
+
             snap.forEach(d => {
                 master.push({id: d.id, ...d.data()});
             });
@@ -209,7 +181,6 @@
             master.forEach(data => {
                 let sClass = data.fileStatus?.includes('تأكيد') ? 'status-success' : data.fileStatus?.includes('ملغى') ? 'status-danger' : 'status-warning';
                 
-                // شارة المرافق
                 let compBadge = data.hasCompanion ? 
                     `<span class="comp-badge comp-yes">نعم ✅</span>` : 
                     `<span class="comp-badge comp-no">لا 👤</span>`;
@@ -232,12 +203,11 @@
         });
     }
 
-    // --- فتح نافذة التعديل ---
+    // دوال التعديل والحذف متاحة للجميع
     window.openEdit = (id) => {
         curId = id; 
         const item = master.find(i => i.id === id);
         
-        // تعبئة البيانات الأساسية
         document.getElementById('edit_firstName').value = item.firstName;
         document.getElementById('edit_lastName').value = item.lastName;
         document.getElementById('edit_passportNum').value = item.passportNum;
@@ -245,13 +215,11 @@
         document.getElementById('edit_phone').value = item.phone;
         document.getElementById('edit_groupName').value = item.groupName;
         
-        // التعامل مع المرافق
         const compSection = document.getElementById('comp_section');
         const hasCompInput = document.getElementById('hasCompFlag');
         
         if (item.hasCompanion) {
             hasCompInput.value = "true";
-            // إظهار القسم وتعبئة البيانات
             compSection.style.display = 'contents'; 
             document.getElementById('edit_comp_firstName').value = item.comp_firstName || "";
             document.getElementById('edit_comp_lastName').value = item.comp_lastName || "";
@@ -259,7 +227,6 @@
             document.getElementById('edit_comp_paymentNum').value = item.comp_paymentNum || "";
         } else {
             hasCompInput.value = "false";
-            // إخفاء القسم
             compSection.style.display = 'none';
         }
 
@@ -275,12 +242,10 @@
         });
     };
 
-    // --- حفظ التعديلات ---
     window.saveChanges = async () => {
         const ref = doc(db, COLLECTION_NAME, curId);
         const hasComp = document.getElementById('hasCompFlag').value === "true";
         
-        // البيانات الأساسية
         const updatedData = {
             firstName: document.getElementById('edit_firstName').value,
             lastName: document.getElementById('edit_lastName').value,
@@ -291,7 +256,6 @@
             fileStatus: document.getElementById('selectedStatus').value
         };
 
-        // إضافة بيانات المرافق فقط إذا كان موجوداً أصلاً
         if (hasComp) {
             updatedData.comp_firstName = document.getElementById('edit_comp_firstName').value;
             updatedData.comp_lastName = document.getElementById('edit_comp_lastName').value;
