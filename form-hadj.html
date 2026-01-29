@@ -9,148 +9,86 @@
     <style>
         :root { --primary: #1a1a1a; --accent: #d4af37; --bg: #fdfbf7; --success: #27ae60; --danger: #e74c3c; }
         body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
-
-        .header { background: var(--primary); color: var(--accent); padding: 25px; text-align: center; border-bottom: 5px solid var(--accent); position: relative; }
-        .admin-trigger { position: absolute; left: 20px; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 20px; }
+        .header { background: var(--primary); color: var(--accent); padding: 25px; text-align: center; border-bottom: 5px solid var(--accent); }
         .header h2 { margin: 0; font-weight: 900; color: white; }
-
         .form-container { max-width: 800px; margin: 30px auto; background: white; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); overflow: hidden; border-top: 10px solid var(--accent); }
         .form-body { padding: 35px; }
-        
         .form-row { display: flex; gap: 15px; }
         .form-row .field-group { flex: 1; }
-
         .field-group { display: flex; flex-direction: column; margin-bottom: 18px; }
         .field-group label { font-weight: 700; margin-bottom: 8px; color: var(--primary); font-size: 14px; }
-        .field-group input, .field-group select { padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; background: white; }
-        .field-group input:focus, .field-group select:focus { border-color: var(--accent); }
-        
-        /* تنسيق قسم المرافق */
-        #companionSection {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px dashed var(--accent);
-            margin-bottom: 20px;
-            display: none; /* مخفي افتراضياً */
-            animation: fadeIn 0.5s;
-        }
-
-        .section-title {
-            color: var(--accent);
-            font-weight: 900;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .error-msg { color: var(--danger); font-size: 13px; font-weight: bold; margin-top: 5px; display: none; }
+        .field-group input, .field-group select, .field-group textarea { padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; background: white; }
+        .field-group input:focus, .field-group textarea:focus { border-color: var(--accent); }
+        #companionSection { background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px dashed var(--accent); margin-bottom: 20px; display: none; }
+        .section-title { color: var(--accent); font-weight: 900; margin-bottom: 15px; }
         .submit-btn { width: 100%; padding: 18px; background: var(--primary); color: var(--accent); border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; border: 1px solid var(--accent); transition: 0.3s; }
         .submit-btn:hover { background: var(--accent); color: white; }
-
-        /* شاشة الادمن */
-        #loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10001; display: none; justify-content: center; align-items: center; }
-        .login-card { background: white; padding: 35px; border-radius: 15px; width: 320px; text-align: center; }
-
         @media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="admin-trigger" onclick="openLogin()"><i class="fas fa-lock"></i></div>
     <h2><i class="fas fa-kaaba"></i> تسجيلات الحج والعمرة 2026</h2>
 </div>
 
 <div class="form-container">
     <div id="success-msg" style="display:none; text-align:center; padding:40px;">
         <i class="fas fa-check-circle" style="font-size: 60px; color: var(--success); margin-bottom: 20px;"></i>
-        <h3 style="color: var(--primary);">تم التسجيل بنجاح</h3>
-        <p style="color:#666; margin-bottom:30px;">تم حفظ بياناتك (وبيانات المرافق إن وجدت).</p>
+        <h3>تم التسجيل بنجاح</h3>
         <button onclick="location.reload()" class="submit-btn" style="width:auto; padding: 10px 30px;">تسجيل جديد</button>
     </div>
     
     <form class="form-body" id="hajjForm">
-        
-        <!-- بيانات الحاج الرئيسي -->
         <h3 style="margin-top:0; color:var(--primary)">📋 بيانات مقدم الطلب</h3>
         <div class="form-row">
-            <div class="field-group"><label>اللقب</label><input type="text" id="lastName" placeholder="اللقب" required></div>
-            <div class="field-group"><label>الاسم</label><input type="text" id="firstName" placeholder="الاسم" required></div>
+            <div class="field-group"><label>اللقب</label><input type="text" id="lastName" required></div>
+            <div class="field-group"><label>الاسم</label><input type="text" id="firstName" required></div>
         </div>
         <div class="form-row">
-            <div class="field-group"><label>رقم جواز السفر (9 أرقام)</label><input type="text" id="passportNum" maxlength="9" placeholder="123456789" required></div>
-            <div class="field-group">
-                <label>رقم وصل الدفع (000000/00)</label>
-                <input type="text" id="paymentNum" maxlength="9" placeholder="000000/00" required>
-            </div>
+            <div class="field-group"><label>رقم جواز السفر</label><input type="text" id="passportNum" maxlength="9" required></div>
+            <div class="field-group"><label>رقم وصل الدفع (000000/00)</label><input type="text" id="paymentNum" maxlength="9" placeholder="000000/00" required></div>
         </div>
         <div class="form-row">
             <div class="field-group"><label>رقم الهاتف</label><input type="tel" id="phone" required></div>
             <div class="field-group"><label>اسم المجموعة</label><input type="text" id="groupName" required></div>
         </div>
 
+        <!-- خانة الملاحظات الجديدة -->
+        <div class="field-group">
+            <label>ملاحظات إضافية (اختياري)</label>
+            <textarea id="notes" rows="3" placeholder="أكتب أي ملاحظات هنا..."></textarea>
+        </div>
+
         <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
 
-        <!-- سؤال المرافق -->
         <div class="field-group">
-            <label style="font-size:16px; color:var(--accent);">هل يرافقك شخص آخر (زوجة / محرم)؟</label>
+            <label style="color:var(--accent);">هل يرافقك شخص آخر؟</label>
             <select id="hasCompanion" onchange="toggleCompanion()">
-                <option value="no">لا، أسافر بمفردي</option>
-                <option value="yes">نعم، يوجد مرافق</option>
+                <option value="no">لا</option>
+                <option value="yes">نعم</option>
             </select>
         </div>
 
-        <!-- قسم المرافق (مخفي) -->
         <div id="companionSection">
-            <div class="section-title"><i class="fas fa-user-friends"></i> بيانات المرافق (الزوجة/المحرم)</div>
-            
+            <div class="section-title">👥 بيانات المرافق</div>
             <div class="form-row">
-                <div class="field-group">
-                    <label>لقب المرافق</label>
-                    <input type="text" id="comp_lastName" class="comp-input">
-                </div>
-                <div class="field-group">
-                    <label>اسم المرافق</label>
-                    <input type="text" id="comp_firstName" class="comp-input">
-                </div>
+                <div class="field-group"><label>اللقب</label><input type="text" id="comp_lastName" class="comp-input"></div>
+                <div class="field-group"><label>الاسم</label><input type="text" id="comp_firstName" class="comp-input"></div>
             </div>
-
             <div class="form-row">
-                <div class="field-group">
-                    <label>جواز سفر المرافق</label>
-                    <input type="text" id="comp_passportNum" maxlength="9" class="comp-input">
-                </div>
-                <div class="field-group">
-                    <label>رقم دفع المرافق (000000/00)</label>
-                    <input type="text" id="comp_paymentNum" maxlength="9" class="comp-input">
-                </div>
+                <div class="field-group"><label>الجواز</label><input type="text" id="comp_passportNum" maxlength="9" class="comp-input"></div>
+                <div class="field-group"><label>الدفع</label><input type="text" id="comp_paymentNum" maxlength="9" class="comp-input"></div>
             </div>
         </div>
 
-        <div id="mainError" class="error-msg" style="text-align:center; font-size:16px;">يرجى التحقق من صيغة أرقام الدفع</div>
-        <button type="submit" class="submit-btn" id="submitBtn">إرسال التسجيل <i class="fas fa-paper-plane"></i></button>
+        <button type="submit" class="submit-btn" id="submitBtn">إرسال التسجيل</button>
     </form>
-</div>
-
-<!-- نافذة دخول المدير -->
-<div id="loginOverlay">
-    <div class="login-card">
-        <h3>دخول المشرف 🔒</h3>
-        <input type="email" id="email" placeholder="البريد الإلكتروني" style="width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ddd;">
-        <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ddd;">
-        <button onclick="handleLogin()" class="submit-btn" style="padding:10px; font-size:14px;">دخول</button>
-        <button onclick="closeLogin()" style="background:none; border:none; color:red; margin-top:10px; cursor:pointer;">إلغاء</button>
-    </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD77gThYcLxvDGXBCLuhmuH_uL0R9vuXyk",
@@ -163,36 +101,24 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
     const COLLECTION_NAME = "hajj_umrah_new";
 
-    // --- دالة إظهار/إخفاء المرافق ---
     window.toggleCompanion = () => {
         const val = document.getElementById('hasCompanion').value;
         const section = document.getElementById('companionSection');
         const inputs = section.querySelectorAll('.comp-input');
-
         if (val === 'yes') {
             section.style.display = 'block';
-            // جعل الحقول مطلوبة إذا تم اختيار "نعم"
             inputs.forEach(input => input.setAttribute('required', 'true'));
         } else {
             section.style.display = 'none';
-            // إزالة شرط "مطلوب" وإفراغ الحقول
-            inputs.forEach(input => {
-                input.removeAttribute('required');
-                input.value = '';
-            });
+            inputs.forEach(input => { input.removeAttribute('required'); input.value = ''; });
         }
     };
 
-    // --- إرسال الاستمارة ---
     document.getElementById('hajjForm').onsubmit = async (e) => {
         e.preventDefault();
-        
         const hasComp = document.getElementById('hasCompanion').value === 'yes';
-        
-        // البيانات الأساسية
         const mainData = {
             firstName: document.getElementById('firstName').value,
             lastName: document.getElementById('lastName').value,
@@ -200,68 +126,30 @@
             paymentNum: document.getElementById('paymentNum').value,
             phone: document.getElementById('phone').value,
             groupName: document.getElementById('groupName').value,
+            notes: document.getElementById('notes').value, // تم إضافة الملاحظات هنا
             createdAt: new Date().toISOString().split('T')[0],
             fileStatus: 'غير مؤكد ⏳',
             hasCompanion: hasComp
         };
 
-        // التحقق من صيغة الدفع (Regex)
         const payPattern = /^\d{6}\/\d{2}$/;
+        if (!payPattern.test(mainData.paymentNum)) { alert("رقم دفع مقدم الطلب خطأ"); return; }
 
-        // تحقق الحاج الرئيسي
-        if (!payPattern.test(mainData.paymentNum)) {
-            alert("رقم دفع مقدم الطلب غير صحيح (يجب أن يكون 000000/00)");
-            return;
-        }
-
-        // إذا كان هناك مرافق، نجمع بياناته
         if (hasComp) {
-            const compData = {
-                comp_firstName: document.getElementById('comp_firstName').value,
-                comp_lastName: document.getElementById('comp_lastName').value,
-                comp_passportNum: document.getElementById('comp_passportNum').value,
-                comp_paymentNum: document.getElementById('comp_paymentNum').value
-            };
-
-            // تحقق المرافق
-            if (!payPattern.test(compData.comp_paymentNum)) {
-                alert("رقم دفع المرافق غير صحيح (يجب أن يكون 000000/00)");
-                return;
-            }
-
-            // دمج البيانات
-            Object.assign(mainData, compData);
+            mainData.comp_firstName = document.getElementById('comp_firstName').value;
+            mainData.comp_lastName = document.getElementById('comp_lastName').value;
+            mainData.comp_passportNum = document.getElementById('comp_passportNum').value;
+            mainData.comp_paymentNum = document.getElementById('comp_paymentNum').value;
+            if (!payPattern.test(mainData.comp_paymentNum)) { alert("رقم دفع المرافق خطأ"); return; }
         }
 
         const btn = document.getElementById('submitBtn');
-        btn.innerHTML = 'جاري الحفظ...';
         btn.disabled = true;
-
-        try {
-            await addDoc(collection(db, COLLECTION_NAME), mainData);
-            document.getElementById('hajjForm').style.display = 'none';
-            document.getElementById('success-msg').style.display = 'block';
-        } catch (err) {
-            console.error(err);
-            alert("حدث خطأ في الاتصال");
-            btn.innerHTML = 'إرسال التسجيل';
-            btn.disabled = false;
-        }
+        btn.innerHTML = 'جاري الحفظ...';
+        await addDoc(collection(db, COLLECTION_NAME), mainData);
+        document.getElementById('hajjForm').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
     };
-
-    window.openLogin = () => document.getElementById('loginOverlay').style.display = 'flex';
-    window.closeLogin = () => document.getElementById('loginOverlay').style.display = 'none';
-    
-    window.handleLogin = async () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-        try { 
-            await signInWithEmailAndPassword(auth, email, pass);
-            window.location.href = "admin.html";
-        }
-        catch(e) { alert("خطأ في بيانات الدخول"); }
-    };
-
 </script>
 </body>
 </html>
