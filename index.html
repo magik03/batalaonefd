@@ -78,7 +78,7 @@
         /* نظام الكروت (Buttons) */
         .grid-links {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* تحسين التجاوب لتسع 3 كروت */
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -138,13 +138,6 @@
             color: var(--primary);
         }
 
-        /* تنسيق خاص للطباعة */
-        @media print {
-            body { background: white; }
-            .admin-dashboard { box-shadow: none; border: 1px solid #ddd; }
-            .nav-card:hover { transform: none; }
-        }
-
         @media (max-width: 600px) {
             .grid-links { grid-template-columns: 1fr; }
         }
@@ -160,16 +153,25 @@
         </div>
 
         <div class="grid-links">
+            <!-- كرت المراسلة -->
             <a href="form-morasala.html" class="nav-card">
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNAUyxIcXbp_YvkBbIwde2mFtUWXhmmGcUmg&s" alt="ONEFD">
-                <span>تسجيلات  مراسلة</span>
-                <div class="badge">تسجيلات  مراسلة</div>
+                <span>تسجيلات مراسلة</span>
+                <div class="badge">ONEFD</div>
             </a>
 
+            <!-- كرت البطالة -->
             <a href="form-batala.html" class="nav-card">
                 <img src="https://img.sur.ly/favicons/a/anem.dz.ico" alt="ANEM">
-                <span>تسجيلات لبطالة</span>
-                <div class="badge">تسجيلات البطالة</div>
+                <span>تسجيلات البطالة</span>
+                <div class="badge">ANEM</div>
+            </a>
+
+            <!-- كرت الحج والعمرة (الجديد) -->
+            <a href="form-hadj.html" class="nav-card"> <!-- تأكد أن اسم الملف صحيح -->
+                <img src="https://cdn-icons-png.flaticon.com/512/2319/2319886.png" alt="Hajj">
+                <span>الحج والعمرة</span>
+                <div class="badge">موسم 2026</div>
             </a>
         </div>
 
