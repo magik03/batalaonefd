@@ -8,18 +8,63 @@
     <style>
         :root { --primary: #1a1a1a; --accent: #d4af37; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; direction: rtl; }
-        .header { background: var(--primary); color: white; padding: 25px 45px; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--accent); }
-        .search-container { padding: 25px 45px; background: white; display: flex; gap: 15px; }
+        
+        /* Header */
+        .header { background: var(--primary); color: white; padding: 20px 45px; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--accent); }
+        
+        /* Groups Filter Section */
+        .groups-container {
+            padding: 20px 45px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            background: #fff;
+            margin-bottom: 2px;
+            border-bottom: 1px solid #eee;
+        }
+        .group-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .group-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .group-card.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
+        .group-card.active .group-count { background: white; color: var(--primary); }
+        
+        .group-name { font-weight: 900; font-size: 16px; }
+        .group-count {
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Search */
+        .search-container { padding: 15px 45px; background: white; display: flex; gap: 15px; }
         .search-input { flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; }
-        .table-container { padding: 30px 45px; overflow-x: auto; }
+        
+        /* Table */
+        .table-container { padding: 20px 45px; overflow-x: auto; min-height: 400px; }
         table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-collapse: collapse; white-space: nowrap; }
         th, td { padding: 15px; text-align: center; border-bottom: 1px solid #f0f0f0; }
         th { background: #f8f9fa; color: var(--primary); font-weight: 900; }
         td.group-col { font-weight: bold; color: var(--accent); background-color: #fdfdfd; }
+        
         .status-pill { padding: 6px 15px; border-radius: 50px; font-size: 12px; font-weight: 900; display: inline-block; }
         .status-success { background: #d4edda; color: #155724; }
         .status-warning { background: #fff3cd; color: #856404; }
         .status-danger { background: #f8d7da; color: #721c24; }
+        
         .comp-badge { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
         .comp-yes { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
         .comp-no { background: #f5f5f5; color: #777; }
@@ -43,8 +88,13 @@
         <a href="index.html" style="background:var(--accent); color:var(--primary); padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:900;">الرئيسية</a>
     </div>
 
+    <!-- قسم المجموعات (الأيقونات) -->
+    <div class="groups-container" id="groupsFilters">
+        <!-- سيتم توليد المجموعات هنا تلقائياً -->
+    </div>
+
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." onkeyup="filterTable()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث بالاسم، الرقم، أو الحالة..." onkeyup="filterSearch()">
     </div>
 
     <div class="table-container">
@@ -54,7 +104,7 @@
                     <th>المجموعة</th>
                     <th>الاسم واللقب</th>
                     <th>مرافق؟</th>
-                    <th>ملاحظات</th> <!-- تمت الإضافة -->
+                    <th>ملاحظات</th>
                     <th>رقم الجواز</th>
                     <th>رقم الدفع</th>
                     <th>الهاتف</th>
@@ -67,6 +117,7 @@
     </div>
 </div>
 
+<!-- Modal تعديل -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-edit"></i> تعديل بيانات الحاج/المعتمر</h3>
@@ -80,7 +131,6 @@
             <div><label>الهاتف:</label><input type="text" id="edit_phone"></div>
             <div><label>المجموعة:</label><input type="text" id="edit_groupName"></div>
 
-            <!-- خانة تعديل الملاحظات -->
             <div style="grid-column: span 2;">
                 <label>ملاحظات:</label>
                 <textarea id="edit_notes" rows="2" style="width:100%"></textarea>
@@ -131,18 +181,19 @@
     const db = getFirestore(app);
     const COLLECTION_NAME = "hajj_umrah_new";
 
-    listenData();
     let master = []; 
+    let currentFilter = 'ALL'; // لتخزين المجموعة المختارة حالياً
     let curId = "";
+
+    listenData();
     
     function listenData() {
         onSnapshot(collection(db, COLLECTION_NAME), snap => {
             master = [];
-            const tbody = document.getElementById('tBody');
-            tbody.innerHTML = "";
             
             snap.forEach(d => { master.push({id: d.id, ...d.data()}); });
 
+            // ترتيب البيانات حسب المجموعة ثم اللقب
             master.sort((a, b) => {
                 const groupA = (a.groupName || "").toString();
                 const groupB = (b.groupName || "").toString();
@@ -150,31 +201,107 @@
                 return groupA.localeCompare(groupB, 'ar');
             });
 
-            master.forEach(data => {
-                let sClass = data.fileStatus?.includes('تأكيد') ? 'status-success' : data.fileStatus?.includes('ملغى') ? 'status-danger' : 'status-warning';
-                let compBadge = data.hasCompanion ? `<span class="comp-badge comp-yes">نعم ✅</span>` : `<span class="comp-badge comp-no">لا 👤</span>`;
-                
-                // عرض الملاحظات في الجدول (قص النص إذا كان طويلاً)
-                let noteText = data.notes ? data.notes.substring(0, 20) + (data.notes.length > 20 ? "..." : "") : "-";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="group-col">${data.groupName}</td>
-                        <td style="font-weight:bold">${data.lastName} ${data.firstName}</td>
-                        <td>${compBadge}</td>
-                        <td style="font-size:12px; color:#555;">${noteText}</td> <!-- عمود الملاحظات -->
-                        <td>${data.passportNum}</td>
-                        <td>${data.paymentNum}</td>
-                        <td>${data.phone}</td>
-                        <td><span class="status-pill ${sClass}">${data.fileStatus || 'انتظار'}</span></td>
-                        <td>
-                            <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-action" style="background:var(--danger)" onclick="deleteEntry('${data.id}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
+            renderGroupFilters();
+            renderTable(currentFilter);
         });
     }
+
+    // ----------------------------------------------------
+    // دالة إنشاء أيقونات المجموعات مع الحساب
+    // ----------------------------------------------------
+    function renderGroupFilters() {
+        const container = document.getElementById('groupsFilters');
+        
+        // 1. تجميع البيانات لحساب العدد لكل مجموعة
+        let groupsStats = {};
+        let totalCount = 0;
+
+        master.forEach(item => {
+            let gName = item.groupName ? item.groupName.trim() : "بدون مجموعة";
+            if (gName === "") gName = "بدون مجموعة";
+
+            // حساب عدد الأشخاص (الحاج + المرافق إن وجد)
+            let count = 1; // الحاج نفسه
+            if (item.hasCompanion) {
+                count = 2; // الحاج + المرافق
+            }
+
+            if (!groupsStats[gName]) {
+                groupsStats[gName] = 0;
+            }
+            groupsStats[gName] += count;
+            totalCount += count;
+        });
+
+        // 2. إنشاء HTML للأيقونات
+        let html = `
+            <div class="group-card ${currentFilter === 'ALL' ? 'active' : ''}" onclick="changeFilter('ALL')">
+                <span class="group-name">الكل</span>
+                <span class="group-count">${totalCount}</span>
+            </div>
+        `;
+
+        // ترتيب المجموعات أبجدياً
+        Object.keys(groupsStats).sort().forEach(gName => {
+            html += `
+                <div class="group-card ${currentFilter === gName ? 'active' : ''}" onclick="changeFilter('${gName}')">
+                    <span class="group-name">${gName}</span>
+                    <span class="group-count">${groupsStats[gName]}</span>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    // تغيير الفلتر عند الضغط
+    window.changeFilter = (groupName) => {
+        currentFilter = groupName;
+        renderGroupFilters(); // لتحديث الـ class active
+        renderTable(groupName);
+    };
+
+    // ----------------------------------------------------
+    // دالة عرض الجدول بناءً على الفلتر
+    // ----------------------------------------------------
+    window.renderTable = (filterGroup) => {
+        const tbody = document.getElementById('tBody');
+        tbody.innerHTML = "";
+
+        // تصفية البيانات
+        const filteredData = filterGroup === 'ALL' 
+            ? master 
+            : master.filter(item => {
+                let g = item.groupName ? item.groupName.trim() : "بدون مجموعة";
+                if(g === "") g = "بدون مجموعة";
+                return g === filterGroup;
+            });
+
+        filteredData.forEach(data => {
+            let sClass = data.fileStatus?.includes('تأكيد') ? 'status-success' : data.fileStatus?.includes('ملغى') ? 'status-danger' : 'status-warning';
+            let compBadge = data.hasCompanion ? `<span class="comp-badge comp-yes">نعم ✅</span>` : `<span class="comp-badge comp-no">لا 👤</span>`;
+            let noteText = data.notes ? data.notes.substring(0, 20) + (data.notes.length > 20 ? "..." : "") : "-";
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="group-col">${data.groupName || '-'}</td>
+                    <td style="font-weight:bold">${data.lastName} ${data.firstName}</td>
+                    <td>${compBadge}</td>
+                    <td style="font-size:12px; color:#555;">${noteText}</td>
+                    <td>${data.passportNum}</td>
+                    <td>${data.paymentNum}</td>
+                    <td>${data.phone}</td>
+                    <td><span class="status-pill ${sClass}">${data.fileStatus || 'انتظار'}</span></td>
+                    <td>
+                        <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action" style="background:var(--danger)" onclick="deleteEntry('${data.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+        
+        // إعادة تطبيق البحث النصي إذا كان هناك نص مكتوب
+        filterSearch();
+    };
 
     window.openEdit = (id) => {
         curId = id; 
@@ -186,7 +313,7 @@
         document.getElementById('edit_paymentNum').value = item.paymentNum;
         document.getElementById('edit_phone').value = item.phone;
         document.getElementById('edit_groupName').value = item.groupName;
-        document.getElementById('edit_notes').value = item.notes || ""; // جلب الملاحظات
+        document.getElementById('edit_notes').value = item.notes || "";
 
         const compSection = document.getElementById('comp_section');
         const hasCompInput = document.getElementById('hasCompFlag');
@@ -226,7 +353,7 @@
             paymentNum: document.getElementById('edit_paymentNum').value,
             phone: document.getElementById('edit_phone').value,
             groupName: document.getElementById('edit_groupName').value,
-            notes: document.getElementById('edit_notes').value, // حفظ الملاحظات المعدلة
+            notes: document.getElementById('edit_notes').value,
             fileStatus: document.getElementById('selectedStatus').value
         };
 
@@ -244,7 +371,8 @@
     window.closeModal = () => document.getElementById('editModal').style.display = 'none';
     window.deleteEntry = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, COLLECTION_NAME, id)); };
     
-    window.filterTable = () => { 
+    // تعديل دالة البحث لتعمل مع الفلتر
+    window.filterSearch = () => { 
         const input = document.getElementById('searchInput').value.toLowerCase();
         const tr = document.getElementById('tBody').getElementsByTagName('tr');
         for (let i = 0; i < tr.length; i++) {
