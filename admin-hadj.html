@@ -11,43 +11,19 @@
         
         /* Header */
         .header { background: var(--primary); color: white; padding: 20px 45px; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--accent); }
+        .header-buttons { display: flex; gap: 10px; }
         
+        .btn-print { background: white; color: var(--primary); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 900; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-print:hover { background: #eee; }
+
         /* Groups Filter Section */
-        .groups-container {
-            padding: 20px 45px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            background: #fff;
-            margin-bottom: 2px;
-            border-bottom: 1px solid #eee;
-        }
-        .group-card {
-            background: white;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 120px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+        .groups-container { padding: 20px 45px; display: flex; gap: 15px; flex-wrap: wrap; background: #fff; margin-bottom: 2px; border-bottom: 1px solid #eee; }
+        .group-card { background: white; border: 2px solid #eee; border-radius: 12px; padding: 10px 20px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; min-width: 120px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .group-card:hover { transform: translateY(-3px); border-color: var(--accent); }
         .group-card.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
         .group-card.active .group-count { background: white; color: var(--primary); }
-        
         .group-name { font-weight: 900; font-size: 16px; }
-        .group-count {
-            background: var(--primary);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+        .group-count { background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 14px; font-weight: bold; }
 
         /* Search */
         .search-container { padding: 15px 45px; background: white; display: flex; gap: 15px; }
@@ -65,8 +41,8 @@
         .status-warning { background: #fff3cd; color: #856404; }
         .status-danger { background: #f8d7da; color: #721c24; }
         
-        .comp-badge { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .comp-yes { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+        .comp-badge { padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+        .comp-yes { color: #0d47a1; font-weight: bold; }
         .comp-no { background: #f5f5f5; color: #777; }
         
         /* Modal */
@@ -76,8 +52,20 @@
         .editor-grid input, .editor-grid select, .editor-grid textarea { padding: 12px; border: 1.5px solid #ccc; border-radius: 8px; font-family: 'Cairo'; width: 100%; box-sizing: border-box; }
         .section-header { grid-column: span 2; margin-top: 15px; padding-bottom: 5px; border-bottom: 2px dashed #eee; color: var(--accent); font-weight: bold; }
         .opt-btn { padding: 12px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; font-weight: bold; flex: 1; transition: 0.3s; }
-        .active { border-color: black; transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .btn-action { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 14px; }
+        .active-btn { border-color: black; transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-action { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 14px; margin: 2px; }
+
+        /* إعدادات الطباعة */
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            body { background: white; }
+            .header, .groups-container, .search-container { display: none !important; }
+            .table-container { padding: 0; box-shadow: none; min-height: auto; }
+            table { border: 2px solid #000; }
+            th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; white-space: normal; word-wrap: break-word; }
+            th:last-child, td:last-child { display: none !important; } /* إخفاء عمود الإجراءات */
+            .status-pill { border: 1px solid #000; padding: 2px 5px; }
+        }
     </style>
 </head>
 <body>
@@ -85,7 +73,10 @@
 <div id="adminContent">
     <div class="header">
         <h2><i class="fas fa-users-cog"></i> إدارة تسجيلات الحج والعمرة</h2>
-        <a href="index.html" style="background:var(--accent); color:var(--primary); padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:900;">الرئيسية</a>
+        <div class="header-buttons">
+            <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> طباعة القائمة</button>
+            <a href="index.html" style="background:var(--accent); color:var(--primary); padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:900;">الرئيسية</a>
+        </div>
     </div>
 
     <!-- قسم المجموعات (الأيقونات) -->
@@ -98,12 +89,12 @@
     </div>
 
     <div class="table-container">
-        <table>
+        <table id="dataTable">
             <thead>
                 <tr>
                     <th>المجموعة</th>
-                    <th>الاسم واللقب</th>
-                    <th>مرافق؟</th>
+                    <th>مقدم الطلب</th>
+                    <th>المرافق (الزوج/ة)</th>
                     <th>ملاحظات</th>
                     <th>رقم الجواز</th>
                     <th>رقم الدفع</th>
@@ -117,10 +108,10 @@
     </div>
 </div>
 
-<!-- Modal تعديل -->
+<!-- Modal التفاصيل والتعديل -->
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <h3><i class="fas fa-edit"></i> تعديل بيانات الحاج/المعتمر</h3>
+        <h3><i class="fas fa-eye"></i> عرض وتعديل بيانات الحاج/المعتمر</h3>
         <div id="editor" class="editor-grid">
             
             <div class="section-header">👤 بيانات مقدم الطلب</div>
@@ -159,7 +150,7 @@
         
         <div style="margin-top:20px; display:flex; gap:10px;">
             <button onclick="saveChanges()" style="flex:2; padding:16px; background:var(--primary); color:var(--accent); border:none; border-radius:10px; cursor:pointer; font-weight:bold;">حفظ التعديلات</button>
-            <button onclick="closeModal()" style="flex:1; padding:16px; background:#eee; border:none; border-radius:10px; cursor:pointer;">إلغاء</button>
+            <button onclick="closeModal()" style="flex:1; padding:16px; background:#eee; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">إغلاق</button>
         </div>
     </div>
 </div>
@@ -182,7 +173,7 @@
     const COLLECTION_NAME = "hajj_umrah_new";
 
     let master = []; 
-    let currentFilter = 'ALL'; // لتخزين المجموعة المختارة حالياً
+    let currentFilter = 'ALL'; 
     let curId = "";
 
     listenData();
@@ -190,10 +181,8 @@
     function listenData() {
         onSnapshot(collection(db, COLLECTION_NAME), snap => {
             master = [];
-            
             snap.forEach(d => { master.push({id: d.id, ...d.data()}); });
 
-            // ترتيب البيانات حسب المجموعة ثم اللقب
             master.sort((a, b) => {
                 const groupA = (a.groupName || "").toString();
                 const groupB = (b.groupName || "").toString();
@@ -206,13 +195,8 @@
         });
     }
 
-    // ----------------------------------------------------
-    // دالة إنشاء أيقونات المجموعات مع الحساب
-    // ----------------------------------------------------
     function renderGroupFilters() {
         const container = document.getElementById('groupsFilters');
-        
-        // 1. تجميع البيانات لحساب العدد لكل مجموعة
         let groupsStats = {};
         let totalCount = 0;
 
@@ -220,20 +204,12 @@
             let gName = item.groupName ? item.groupName.trim() : "بدون مجموعة";
             if (gName === "") gName = "بدون مجموعة";
 
-            // حساب عدد الأشخاص (الحاج + المرافق إن وجد)
-            let count = 1; // الحاج نفسه
-            if (item.hasCompanion) {
-                count = 2; // الحاج + المرافق
-            }
-
-            if (!groupsStats[gName]) {
-                groupsStats[gName] = 0;
-            }
+            let count = item.hasCompanion ? 2 : 1;
+            if (!groupsStats[gName]) groupsStats[gName] = 0;
             groupsStats[gName] += count;
             totalCount += count;
         });
 
-        // 2. إنشاء HTML للأيقونات
         let html = `
             <div class="group-card ${currentFilter === 'ALL' ? 'active' : ''}" onclick="changeFilter('ALL')">
                 <span class="group-name">الكل</span>
@@ -241,7 +217,6 @@
             </div>
         `;
 
-        // ترتيب المجموعات أبجدياً
         Object.keys(groupsStats).sort().forEach(gName => {
             html += `
                 <div class="group-card ${currentFilter === gName ? 'active' : ''}" onclick="changeFilter('${gName}')">
@@ -254,21 +229,16 @@
         container.innerHTML = html;
     }
 
-    // تغيير الفلتر عند الضغط
     window.changeFilter = (groupName) => {
         currentFilter = groupName;
-        renderGroupFilters(); // لتحديث الـ class active
+        renderGroupFilters();
         renderTable(groupName);
     };
 
-    // ----------------------------------------------------
-    // دالة عرض الجدول بناءً على الفلتر
-    // ----------------------------------------------------
     window.renderTable = (filterGroup) => {
         const tbody = document.getElementById('tBody');
         tbody.innerHTML = "";
 
-        // تصفية البيانات
         const filteredData = filterGroup === 'ALL' 
             ? master 
             : master.filter(item => {
@@ -279,27 +249,32 @@
 
         filteredData.forEach(data => {
             let sClass = data.fileStatus?.includes('تأكيد') ? 'status-success' : data.fileStatus?.includes('ملغى') ? 'status-danger' : 'status-warning';
-            let compBadge = data.hasCompanion ? `<span class="comp-badge comp-yes">نعم ✅</span>` : `<span class="comp-badge comp-no">لا 👤</span>`;
+            
+            // تعديل: عرض اسم المرافق مباشرة في الجدول بدلا من كلمة "نعم"
+            let compNameDisplay = data.hasCompanion 
+                ? `<span class="comp-yes">${data.comp_lastName || ''} ${data.comp_firstName || ''}</span>` 
+                : `<span class="comp-badge comp-no">لا يوجد</span>`;
+                
             let noteText = data.notes ? data.notes.substring(0, 20) + (data.notes.length > 20 ? "..." : "") : "-";
 
             tbody.innerHTML += `
                 <tr>
                     <td class="group-col">${data.groupName || '-'}</td>
                     <td style="font-weight:bold">${data.lastName} ${data.firstName}</td>
-                    <td>${compBadge}</td>
+                    <td>${compNameDisplay}</td>
                     <td style="font-size:12px; color:#555;">${noteText}</td>
                     <td>${data.passportNum}</td>
                     <td>${data.paymentNum}</td>
                     <td>${data.phone}</td>
                     <td><span class="status-pill ${sClass}">${data.fileStatus || 'انتظار'}</span></td>
                     <td>
-                        <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-action" style="background:var(--danger)" onclick="deleteEntry('${data.id}')"><i class="fas fa-trash"></i></button>
+                        <!-- تعديل: استبدال القلم بعين -->
+                        <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')" title="عرض وتعديل"><i class="fas fa-eye"></i></button>
+                        <button class="btn-action" style="background:var(--danger)" onclick="deleteEntry('${data.id}')" title="حذف"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
         });
         
-        // إعادة تطبيق البحث النصي إذا كان هناك نص مكتوب
         filterSearch();
     };
 
@@ -337,8 +312,8 @@
     window.setStatus = (s) => {
         document.getElementById('selectedStatus').value = s;
         document.querySelectorAll('.opt-btn').forEach(b => {
-            b.classList.remove('active');
-            if(b.innerText.includes(s.split(' ')[0])) b.classList.add('active');
+            b.classList.remove('active-btn');
+            if(b.innerText.includes(s.split(' ')[0])) b.classList.add('active-btn');
         });
     };
 
@@ -369,9 +344,8 @@
     };
 
     window.closeModal = () => document.getElementById('editModal').style.display = 'none';
-    window.deleteEntry = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, COLLECTION_NAME, id)); };
+    window.deleteEntry = async (id) => { if(confirm("هل أنت متأكد من الحذف؟")) await deleteDoc(doc(db, COLLECTION_NAME, id)); };
     
-    // تعديل دالة البحث لتعمل مع الفلتر
     window.filterSearch = () => { 
         const input = document.getElementById('searchInput').value.toLowerCase();
         const tr = document.getElementById('tBody').getElementsByTagName('tr');
