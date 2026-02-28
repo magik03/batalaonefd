@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل فضاء الأولياء</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #e67e22; --secondary: #2c3e50; --bg: #fdfbf7; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
+        
+        .header { 
+            background: var(--secondary); 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .form-container {
+            max-width: 800px; margin: 30px auto; background: white;
+            border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow: hidden; border-top: 10px solid var(--primary);
+        }
+
+        .form-body { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-col { grid-column: span 2; }
+        
+        .field-group { display: flex; flex-direction: column; text-align: right; }
+        .field-group label { font-weight: 700; margin-bottom: 8px; font-size: 15px; color: #333; }
+        .field-group label i { color: var(--primary); margin-left: 8px; }
+        
+        .field-group input, .field-group textarea { 
+            padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            font-family: 'Cairo'; font-size: 16px; transition: 0.3s;
+        }
+        .field-group input:focus { border-color: var(--primary); outline: none; }
+
+        .submit-btn {
+            grid-column: span 2; padding: 18px; background: var(--secondary);
+            color: white; border: none; border-radius: 15px; font-size: 20px; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { background: var(--primary); transform: translateY(-3px); }
+        
+        .back-link { text-align: center; margin: 20px 0 40px; display: block; color: #888; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2><i class="fas fa-users"></i> فضاء الأولياء (تسجيل جديد)</h2>
+    <a href="admin-awlyaa.html" style="color: white; text-decoration: none; font-weight: bold;">
+        <i class="fas fa-user-shield"></i> الإدارة
+    </a>
+</div>
+
+<div class="form-container">
+    <form class="form-body" id="awlyaaForm">
+        
+        <!-- الاسم واللقب (كامل العرض) -->
+        <div class="field-group full-col">
+            <label><i class="fas fa-user"></i> الاسم واللقب (للولي)</label>
+            <input type="text" id="fullName" placeholder="الاسم الكامل للولي" required>
+        </div>
+
+        <!-- رقم الهاتف -->
+        <div class="field-group">
+            <label><i class="fas fa-phone"></i> رقم الهاتف</label>
+            <input type="tel" id="phone" placeholder="06XXXXXXXX" required style="direction: ltr; text-align: right;">
+        </div>
+
+        <!-- البريد الإلكتروني -->
+        <div class="field-group">
+            <label><i class="fas fa-envelope"></i> البريد الإلكتروني (Email)</label>
+            <input type="email" id="email" placeholder="example@gmail.com" required style="direction: ltr; text-align: right;">
+        </div>
+
+        <!-- الكود (كلمة السر) - كامل العرض ليكون واضحاً -->
+        <div class="field-group full-col">
+            <label><i class="fas fa-key"></i> الكود (Code) - كلمة السر للمنصة</label>
+            <input type="text" id="code" placeholder="أدخل الكود / كلمة السر هنا" required style="border-color: #ffd700; background: #fffff0;">
+        </div>
+
+        <!-- ملاحظات -->
+        <div class="field-group full-col">
+            <label><i class="fas fa-sticky-note"></i> ملاحظات إضافية</label>
+            <textarea id="notes" rows="3" placeholder="أي معلومات إضافية..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+            <i class="fas fa-paper-plane"></i> إرسال الطلب ✅
+        </button>
+    </form>
+</div>
+
+<a href="index.html" class="back-link">⬅️ العودة للرئيسية</a>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8",
+        authDomain: "batalaonefd.firebaseapp.com",
+        projectId: "batalaonefd",
+        storageBucket: "batalaonefd.firebasestorage.app",
+        messagingSenderId: "346007854663",
+        appId: "1:346007854663:web:2d508e74c073061ee31b62"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById('awlyaaForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+        const data = {
+            serviceType: 'فضاء_الأولياء',
+            status: 'قيد الانتظار ⏳',
+            createdAt: new Date().toISOString(),
+            fullName: document.getElementById('fullName').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            code: document.getElementById('code').value,
+            notes: document.getElementById('notes').value
+        };
+
+        try {
+            await addDoc(collection(db, "registrations"), data);
+            alert("✅ تم إرسال المعلومات بنجاح!");
+            location.reload();
+        } catch(err) {
+            console.error(err);
+            alert("❌ خطأ في الإرسال");
+            btn.disabled = false;
+            btn.innerText = "إعادة المحاولة";
+        }
+    };
+</script>
+</body>
+</html>

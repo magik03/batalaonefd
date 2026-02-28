@@ -30,7 +30,7 @@
         .admin-dashboard {
             background: var(--white);
             width: 95%;
-            max-width: 800px;
+            max-width: 900px; /* قمت بزيادة العرض قليلاً لاستيعاب 4 كروت */
             padding: 40px;
             border-radius: 25px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.08);
@@ -78,7 +78,7 @@
         /* نظام الكروت (Buttons) */
         .grid-links {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* تحسين التجاوب لتسع 3 كروت */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* تعديل بسيط لتناسب الكروت */
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -112,7 +112,7 @@
 
         .nav-card span {
             font-weight: 700;
-            font-size: 18px;
+            font-size: 17px;
         }
 
         .nav-card .badge {
@@ -149,7 +149,7 @@
         <div class="header-section">
             <i class="fas fa-user-shield fa-2x"></i>
             <h2>بوابة التحكم المركزية 🔒</h2>
-            <p>مرحباً بك في لوحة الإدارة دمانة السحابية - سوبير إعلام آلي</p>
+            <p>مرحباً بك في لوحة الإدارة السحابية - سوبير إعلام آلي</p>
         </div>
 
         <div class="grid-links">
@@ -167,21 +167,27 @@
                 <div class="badge">ANEM</div>
             </a>
 
-            <!-- كرت الحج والعمرة (الجديد) -->
-            <a href="form-hadj.html" class="nav-card"> <!-- تأكد أن اسم الملف صحيح -->
+            <!-- كرت الحج والعمرة -->
+            <a href="form-hadj.html" class="nav-card">
                 <img src="https://cdn-icons-png.flaticon.com/512/2319/2319886.png" alt="Hajj">
                 <span>الحج والعمرة</span>
                 <div class="badge">موسم 2026</div>
+            </a>
+
+            <!-- كرت فضاء الأولياء (الجديد) -->
+            <a href="user-awlyaa.html" class="nav-card">
+                <img src="https://cdn-icons-png.flaticon.com/512/3408/3408591.png" alt="Awlyaa">
+                <span>فضاء الأولياء</span>
+                <div class="badge" style="color:#e67e22; background:#fff5eb;">AWLYAA</div>
             </a>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
         <a href="index.html" class="footer-link">
-            <i class="fas fa-sign-out-alt"></i> الخروج والعودة لصفحة التسجيل
+            <i class="fas fa-sign-out-alt"></i> الخروج والعودة
         </a>
     </div>
 
 </body>
 </html>
-
