@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #4e73df; --success: #1cc88a; --danger: #e74a3b; --warning: #f6c23e; --dark: #2e59d9; }
+        :root { --primary: #4e73df; --success: #1cc88a; --info: #36b9cc; --warning: #f6c23e; --danger: #e74a3b; --dark: #2e59d9; }
         body { font-family: 'Cairo', sans-serif; background: #f8f9fc; margin: 0; direction: rtl; }
         
         .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
         .back-btn { background: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 8px 20px; border-radius: 10px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
 
-        /* شريط البحث */
         .search-container { padding: 20px 40px; background: white; border-bottom: 1px solid #e3e6f0; display: flex; gap: 10px; }
         .search-input { flex: 1; padding: 12px 20px; border: 2px solid #eaecf4; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
         .search-input:focus { border-color: var(--primary); }
@@ -22,10 +21,9 @@
         th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #eee; }
         th { background: #f1f4f9; color: #333; font-weight: 900; position: sticky; top: 0; }
         
-        .status-pill { padding: 4px 12px; border-radius: 50px; font-weight: bold; font-size: 12px; white-space: nowrap; }
+        .status-pill { padding: 6px 12px; border-radius: 50px; font-weight: bold; font-size: 11px; white-space: nowrap; display: inline-block; }
         .notes-text { font-size: 12px; color: #666; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* Modal Styles */
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:25px; border-radius:20px; width:95%; max-width:700px; max-height: 90vh; overflow-y: auto; }
         .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
@@ -34,8 +32,12 @@
         input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; }
         
         .copy-btn { background: #f1f4f9; border: 1px solid #ddd; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
-        .opt-btn { padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; font-weight: bold; flex: 1; transition: 0.3s; }
-        .active { border-color: black; transform: scale(1.05); }
+        
+        /* تصميم أزرار الحالة الجديدة */
+        .status-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .opt-btn { padding: 12px 8px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 13px; transition: 0.2s; text-align: center; }
+        .opt-btn.active { border-color: #000; transform: scale(1.02); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
         .btn-action { border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; color: white; }
     </style>
 </head>
@@ -58,7 +60,8 @@
                     <th>الاستمارة</th>
                     <th>المستوى</th>
                     <th>الرابط</th>
-                    <th>الملاحظات</th> <th>الحالة</th>
+                    <th>الملاحظات</th> 
+                    <th>الحالة</th>
                     <th>الإجراءات</th>
                 </tr>
             </thead>
@@ -68,19 +71,24 @@
 
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin:0">تعديل البيانات 🖊️</h3>
+            <h3 style="margin:0">تعديل بيانات المترشح 🖊️</h3>
             <div id="editor" class="editor-grid"></div>
-            <div style="margin-top:20px;">
-                <label><b>الحالة:</b></label>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                    <button class="opt-btn" style="background:var(--success); color:white" onclick="setSt('تم التسجيل ✅')">تم ✅</button>
-                    <button class="opt-btn" style="background:var(--warning)" onclick="setSt('قيد الانتظار ⏳')">انتظار ⏳</button>
-                    <button class="opt-btn" style="background:var(--danger); color:white" onclick="setSt('مرفوض ❌')">رفض ❌</button>
+            
+            <div style="margin-top:20px; background: #f8f9fc; padding: 15px; border-radius: 15px;">
+                <label><b>تحديث حالة الملف:</b></label>
+                <div class="status-options">
+                    <button class="opt-btn" style="background:var(--success); color:white" onclick="setSt('تم التسجيل ✅')">تم التسجيل ✅</button>
+                    <button class="opt-btn" style="background:var(--primary); color:white" onclick="setSt('تم فتح الفرض01 💻')">تم فتح الفرض01 💻</button>
+                    <button class="opt-btn" style="background:var(--info); color:white" onclick="setSt('تم تحميل فرض01 📄')">تم تحميل فرض01 📄</button>
+                    <button class="opt-btn" style="background:var(--warning); color:black" onclick="setSt('تم فتح الفرض الإلكتروني')">تم فتح الفرض الإلكتروني</button>
+                    <button class="opt-btn" style="background:#6c757d; color:white" onclick="setSt('قيد الانتظار ⏳')">قيد الانتظار ⏳</button>
+                    <button class="opt-btn" style="background:var(--danger); color:white" onclick="setSt('مرفوض ❌')">مرفوض ❌</button>
                 </div>
             </div>
+
             <input type="hidden" id="selectedStatus">
-            <button onclick="saveData()" style="width:100%; background:var(--primary); color:white; padding:15px; border-radius:10px; border:none; margin-top:20px; cursor:pointer; font-weight:bold;">حفظ التغييرات</button>
-            <button onclick="closeModal()" style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">إغلاق</button>
+            <button onclick="saveData()" style="width:100%; background:var(--dark); color:white; padding:15px; border-radius:10px; border:none; margin-top:20px; cursor:pointer; font-weight:bold; font-size:16px;">حفظ التغييرات</button>
+            <button onclick="closeModal()" style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer; color:#666;">إلغاء وإغلاق</button>
         </div>
     </div>
 
@@ -89,15 +97,20 @@
     import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
     const firebaseConfig = { 
-        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8", authDomain: "batalaonefd.firebaseapp.com", 
-        projectId: "batalaonefd", storageBucket: "batalaonefd.firebasestorage.app", 
-        messagingSenderId: "346007854663", appId: "1:346007854663:web:2d508e74c073061ee31b62" 
+        apiKey: "AIzaSyCCvmqKN3nYQubL6LZYtMY6UtGv-T_fOg8", 
+        authDomain: "batalaonefd.firebaseapp.com", 
+        projectId: "batalaonefd", 
+        storageBucket: "batalaonefd.firebasestorage.app", 
+        messagingSenderId: "346007854663", 
+        appId: "1:346007854663:web:2d508e74c073061ee31b62" 
     };
 
-    const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-    let master = []; let curID = "";
+    const app = initializeApp(firebaseConfig); 
+    const db = getFirestore(app);
+    let master = []; 
+    let curID = "";
 
-    // جلب البيانات مع الترتيب (مقبول -> انتظار -> مرفوض)
+    // جلب البيانات مع ترتيب مخصص للحالات الجديدة
     onSnapshot(collection(db, "registrations"), (snap) => {
         master = [];
         snap.forEach(d => {
@@ -105,10 +118,17 @@
             if(data.serviceType === 'مراسلة') master.push({ id: d.id, ...data });
         });
 
-        // منطق الترتيب
+        // ترتيب الحالات حسب الأهمية أو سير العمل
         master.sort((a, b) => {
-            const order = { 'تم التسجيل ✅': 1, 'قيد الانتظار ⏳': 2, 'مرفوض ❌': 3 };
-            return (order[a.status] || 2) - (order[b.status] || 2);
+            const order = { 
+                'تم فتح الفرض الإلكتروني': 1,
+                'تم تحميل فرض01 📄': 2,
+                'تم فتح الفرض01 💻': 3,
+                'تم التسجيل ✅': 4, 
+                'قيد الانتظار ⏳': 5, 
+                'مرفوض ❌': 6 
+            };
+            return (order[a.status] || 9) - (order[b.status] || 9);
         });
 
         renderTable(master);
@@ -118,17 +138,25 @@
         const body = document.getElementById('tBody');
         body.innerHTML = "";
         dataList.forEach(data => {
-            const linkView = data.externalLink ? `<a href="${data.externalLink}" target="_blank" style="color:var(--primary); font-weight:bold;">فتح 🔗</a>` : '---';
+            const linkView = data.externalLink ? `<a href="${data.externalLink}" target="_blank" style="color:var(--primary); font-weight:bold; text-decoration:none;">فتح 🔗</a>` : '---';
             const notePreview = data.notes ? `<span class="notes-text" title="${data.notes}">${data.notes}</span>` : '<span style="color:#ccc">لا يوجد</span>';
             
+            // تحديد لون الـ Pill بناءً على الحالة
+            let bg = "#eee"; let color = "#333";
+            if(data.status?.includes('التسجيل')) { bg = "#d1e7dd"; color = "#0f5132"; }
+            else if(data.status?.includes('فتح الفرض01')) { bg = "#cfe2ff"; color = "#084298"; }
+            else if(data.status?.includes('تحميل')) { bg = "#cff4fc"; color = "#055160"; }
+            else if(data.status?.includes('الإلكتروني')) { bg = "#fff3cd"; color = "#856404"; }
+            else if(data.status?.includes('رفض')) { bg = "#f8d7da"; color = "#842029"; }
+
             body.innerHTML += `
                 <tr>
                     <td style="font-weight:bold">${data.fullName || '---'}</td>
-                    <td>${data.formId || '---'}</td>
+                    <td style="font-family:monospace; font-size:14px;">${data.formId || '---'}</td>
                     <td>${data.level || '---'}</td>
                     <td>${linkView}</td>
                     <td>${notePreview}</td>
-                    <td><span class="status-pill" style="background:${data.status?.includes('تم') ? '#d1e7dd' : data.status?.includes('رفض') ? '#f8d7da' : '#fff3cd'}">${data.status || 'انتظار'}</span></td>
+                    <td><span class="status-pill" style="background:${bg}; color:${color}">${data.status || 'قيد الانتظار ⏳'}</span></td>
                     <td>
                         <button class="btn-action" style="background:var(--primary)" onclick="openEdit('${data.id}')"><i class="fas fa-edit"></i></button>
                         <button class="btn-action" style="background:var(--danger)" onclick="delDoc('${data.id}')"><i class="fas fa-trash"></i></button>
@@ -137,10 +165,9 @@
         });
     }
 
-    // وظيفة البحث
     window.filterTable = () => {
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = master.filter(item => item.fullName.toLowerCase().includes(query));
+        const filtered = master.filter(item => (item.fullName || "").toLowerCase().includes(query));
         renderTable(filtered);
     };
 
@@ -148,39 +175,60 @@
         curID = id; const data = master.find(m => m.id === id);
         const editor = document.getElementById('editor'); editor.innerHTML = "";
         const fields = [
-            { id: "fullName", label: "الاسم" }, { id: "formId", label: "الاستمارة" },
-            { id: "level", label: "المستوى" }, { id: "birthDate", label: "التاريخ" },
-            { id: "username", label: "المستخدم" }, { id: "password", label: "السر" },
-            { id: "externalLink", label: "الرابط" }, { id: "notes", label: "ملاحظات" }
+            { id: "fullName", label: "الاسم الكامل" }, { id: "formId", label: "رقم الاستمارة" },
+            { id: "level", label: "المستوى الدراسي" }, { id: "birthDate", label: "تاريخ الميلاد" },
+            { id: "username", label: "اسم المستخدم" }, { id: "password", label: "كلمة السر" },
+            { id: "externalLink", label: "رابط الملف" }, { id: "notes", label: "ملاحظات إضافية" }
         ];
         fields.forEach(f => {
-            editor.innerHTML += `<div class="input-group"><label style="font-size:12px">${f.label}</label>
-                <div class="input-wrapper"><input type="text" id="inp_${f.id}" value="${data[f.id]||''}">
-                <button class="copy-btn" onclick="copyText('inp_${f.id}')"><i class="fas fa-copy"></i></button></div></div>`;
+            editor.innerHTML += `
+                <div class="input-group">
+                    <label style="font-size:12px; font-weight:bold; color:#555">${f.label}</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="inp_${f.id}" value="${data[f.id]||''}">
+                        <button class="copy-btn" onclick="copyText('inp_${f.id}')"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>`;
         });
         setSt(data.status || 'قيد الانتظار ⏳');
         document.getElementById('editModal').style.display = 'flex';
     };
 
     window.copyText = (id) => {
-        const inp = document.getElementById(id); inp.select(); document.execCommand("copy");
-        alert("تم نسخ: " + inp.value);
+        const inp = document.getElementById(id); 
+        inp.select(); 
+        document.execCommand("copy");
+        // تنبيه بسيط
+        const btn = event.currentTarget;
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check" style="color:green"></i>';
+        setTimeout(() => btn.innerHTML = original, 1000);
     };
 
     window.setSt = (s) => {
         document.getElementById('selectedStatus').value = s;
-        document.querySelectorAll('.opt-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(s.substring(0,2))));
+        document.querySelectorAll('.opt-btn').forEach(b => {
+            b.classList.toggle('active', b.innerText.trim() === s.trim());
+        });
     };
 
     window.saveData = async () => {
         const updates = { status: document.getElementById('selectedStatus').value };
         document.querySelectorAll('#editor input').forEach(i => updates[i.id.replace('inp_','')] = i.value);
-        await updateDoc(doc(db, "registrations", curID), updates);
-        closeModal();
+        try {
+            await updateDoc(doc(db, "registrations", curID), updates);
+            closeModal();
+        } catch (e) {
+            alert("خطأ أثناء الحفظ");
+        }
     };
 
     window.closeModal = () => document.getElementById('editModal').style.display='none';
-    window.delDoc = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, "registrations", id)); };
+    
+    window.delDoc = async (id) => { 
+        if(confirm("هل أنت متأكد من حذف هذا الملف نهائياً؟")) 
+        await deleteDoc(doc(db, "registrations", id)); 
+    };
 </script>
 </body>
 </html>
