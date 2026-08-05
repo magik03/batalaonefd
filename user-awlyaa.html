@@ -39,6 +39,18 @@
         }
         .field-group input:focus { border-color: var(--primary); outline: none; }
 
+        .hint { font-size: 12px; color: #999; margin-top: 6px; }
+        .hint.auto { color: var(--primary); font-weight: 700; }
+
+        .code-wrap, .email-wrap { position: relative; }
+        .auto-badge {
+            position: absolute; top: -10px; left: 10px;
+            background: var(--primary); color: white; font-size: 11px;
+            padding: 2px 10px; border-radius: 10px; font-weight: 700;
+            display: none;
+        }
+        .auto-badge.show { display: inline-block; }
+
         .submit-btn {
             grid-column: span 2; padding: 18px; background: var(--secondary);
             color: white; border: none; border-radius: 15px; font-size: 20px; font-weight: 900;
@@ -63,8 +75,9 @@
         
         <!-- الاسم واللقب (كامل العرض) -->
         <div class="field-group full-col">
-            <label><i class="fas fa-user"></i> الاسم واللقب (للولي)</label>
-            <input type="text" id="fullName" placeholder="الاسم الكامل للولي" required>
+            <label><i class="fas fa-user"></i> الاسم واللقب (للولي) - يكتب بالفرنسية</label>
+            <input type="text" id="fullName" placeholder="Nom et prénom (en français)" required style="direction: ltr; text-align: right;">
+            <span class="hint">يسمح فقط بالحروف اللاتينية (الفرنسية) والمسافة والشرطة</span>
         </div>
 
         <!-- رقم الهاتف -->
@@ -76,13 +89,21 @@
         <!-- البريد الإلكتروني -->
         <div class="field-group">
             <label><i class="fas fa-envelope"></i> البريد الإلكتروني (Email)</label>
-            <input type="email" id="email" placeholder="example@gmail.com" required style="direction: ltr; text-align: right;">
+            <div class="email-wrap">
+                <span class="auto-badge" id="emailAutoBadge">تلقائي</span>
+                <input type="email" id="email" placeholder="example@gmail.com" required style="direction: ltr; text-align: right;">
+            </div>
+            <span class="hint">يتكوّن تلقائياً من الاسم واللقب + تاريخ اليوم، ويمكن تعديله يدوياً</span>
         </div>
 
         <!-- الكود (كلمة السر) - كامل العرض ليكون واضحاً -->
         <div class="field-group full-col">
             <label><i class="fas fa-key"></i> الكود (Code) - كلمة السر للمنصة</label>
-            <input type="text" id="code" placeholder="أدخل الكود / كلمة السر هنا" required style="border-color: #ffd700; background: #fffff0;">
+            <div class="code-wrap">
+                <span class="auto-badge" id="codeAutoBadge">تلقائي = رقم الهاتف</span>
+                <input type="text" id="code" placeholder="سيصبح تلقائياً رقم الهاتف" required style="border-color: #ffd700; background: #fffff0;">
+            </div>
+            <span class="hint auto">الكود يساوي رقم الهاتف تلقائياً، ويمكنك تغييره متى شئت</span>
         </div>
 
         <!-- ملاحظات -->
@@ -115,6 +136,77 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // ---------- عناصر النموذج ----------
+    const fullNameEl = document.getElementById('fullName');
+    const phoneEl = document.getElementById('phone');
+    const emailEl = document.getElementById('email');
+    const codeEl = document.getElementById('code');
+    const codeBadge = document.getElementById('codeAutoBadge');
+    const emailBadge = document.getElementById('emailAutoBadge');
+
+    let codeManuallyEdited = false;
+    let emailManuallyEdited = false;
+
+    // ---------- تاريخ اليوم بصيغة DDMMYYYY (مثال: 05082026) ----------
+    function getTodayCode() {
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}${mm}${yyyy}`;
+    }
+    const todayCode = getTodayCode();
+
+    // ---------- إزالة الحركات الفرنسية (accents) لتحويلها لحروف بسيطة في الإيميل ----------
+    function stripAccents(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    // ---------- 1) تصفية حقل الاسم ليقبل الفرنسية فقط ----------
+    fullNameEl.addEventListener('input', () => {
+        const cleaned = fullNameEl.value.replace(/[^a-zA-Z\u00C0-\u017F\s'-]/g, '');
+        if (cleaned !== fullNameEl.value) fullNameEl.value = cleaned;
+        updateEmailFromName();
+    });
+
+    // ---------- 2) توليد الإيميل تلقائياً من الاسم + تاريخ اليوم ----------
+    function updateEmailFromName() {
+        if (emailManuallyEdited) return;
+
+        const parts = fullNameEl.value.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) {
+            emailEl.value = '';
+            emailBadge.classList.remove('show');
+            return;
+        }
+
+        const emailBase = parts
+            .map(p => stripAccents(p).toLowerCase())
+            .join('.');
+
+        emailEl.value = `${emailBase}${todayCode}@gmail.com`;
+        emailBadge.classList.add('show');
+    }
+
+    emailEl.addEventListener('input', () => {
+        emailManuallyEdited = true;
+        emailBadge.classList.remove('show');
+    });
+
+    // ---------- 3) الكود = رقم الهاتف تلقائياً، مع إمكانية التعديل ----------
+    phoneEl.addEventListener('input', () => {
+        if (!codeManuallyEdited) {
+            codeEl.value = phoneEl.value;
+            codeBadge.classList.add('show');
+        }
+    });
+
+    codeEl.addEventListener('input', () => {
+        codeManuallyEdited = true;
+        codeBadge.classList.remove('show');
+    });
+
+    // ---------- الإرسال ----------
     document.getElementById('awlyaaForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
@@ -125,10 +217,11 @@
             serviceType: 'فضاء_الأولياء',
             status: 'قيد الانتظار ⏳',
             createdAt: new Date().toISOString(),
-            fullName: document.getElementById('fullName').value,
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value,
-            code: document.getElementById('code').value,
+            registrationDate: todayCode,
+            fullName: fullNameEl.value,
+            phone: phoneEl.value,
+            email: emailEl.value,
+            code: codeEl.value,
             notes: document.getElementById('notes').value
         };
 
