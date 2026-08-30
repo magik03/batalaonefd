@@ -77,6 +77,58 @@
         .btn-action:hover { opacity: 0.9; transform: translateY(-2px); }
 
         .payment-toggle { display: flex; gap: 15px; align-items: center; background: #f8f9fc; padding: 15px; border-radius: 10px; border: 1px solid #eee; margin-top: 10px; }
+
+        /* ===== منطقة طباعة ملف البطالة (A6) ===== */
+        #printArea { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; margin: 0; }
+            @page { size: A6; margin: 0; }
+        }
+        .print-page {
+            width: 105mm;
+            min-height: 148mm;
+            box-sizing: border-box;
+            padding: 6mm 7mm;
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            display: flex;
+            flex-direction: column;
+        }
+        .print-title {
+            text-align: center;
+            font-weight: 900;
+            font-size: 13px;
+            margin: 0 0 8px 0;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 6px;
+        }
+        .print-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 10.5px;
+            line-height: 1.9;
+        }
+        .print-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+        .print-list li::before {
+            content: "☐";
+            font-size: 13px;
+            line-height: 1;
+        }
+        .print-footer {
+            text-align: center;
+            font-weight: 900;
+            font-size: 11px;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +214,23 @@
         </div>
     </div>
 
+    <!-- منطقة طباعة ملف البطالة (A6) -->
+    <div id="printArea">
+        <div class="print-page">
+            <div class="print-title">الوثائق المطلوبة لملف طلب منحة البطالة</div>
+            <ul class="print-list">
+                <li>شهادة تعهد و إلتزام مستخرجة من المنصة و موقع عليها من طرف المعني.</li>
+                <li>وصل الموعد المستخرج من المنصة.</li>
+                <li>بطاقة التعريف الوطني.</li>
+                <li>صك بريدي مشطوب.</li>
+                <li>شهادة عائلية (للمتزوجين).</li>
+                <li>وثيقة تثبت الوضعية إزاء الخدمة الوطنية.</li>
+                <li>شهادة إقامة (كاشي المير).</li>
+            </ul>
+            <div class="print-footer">Demana Tech</div>
+        </div>
+    </div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -237,6 +306,7 @@
                     <td><span class="status-pill" style="background:${stColor}">${data.status || 'انتظار'}</span></td>
                     <td>
                         <button class="btn-action" style="background:var(--blue)" onclick="openEdit('${data.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action" style="background:var(--dark)" onclick="printFile('${data.id}')" title="طباعة ملف البطالة"><i class="fas fa-print"></i></button>
                         <button class="btn-action" style="background:var(--danger)" onclick="delDoc('${data.id}')" title="حذف"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
@@ -319,6 +389,11 @@
 
     window.closeModal = () => document.getElementById('editModal').style.display='none';
     window.delDoc = async (id) => { if(confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) await deleteDoc(doc(db, "registrations", id)); };
+
+    // طباعة ملف البطالة (A6)
+    window.printFile = (id) => {
+        window.print();
+    };
 </script>
 </body>
 </html>
