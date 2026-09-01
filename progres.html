@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استمارة تسجيل الطلبة</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<style>
+  :root{
+    --primary:#0b5c8a;
+    --primary-dark:#083f5e;
+    --accent:#e8f2f8;
+    --border:#d5e2ea;
+    --text:#1c2b36;
+    --danger:#c0392b;
+    --ok:#1e8449;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:"Segoe UI", Tahoma, Arial, sans-serif;
+    background:#f2f6f9;
+    margin:0;
+    padding:0;
+    color:var(--text);
+  }
+  header{
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color:#fff;
+    padding:18px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  header h1{ font-size:20px; margin:0; }
+  nav{ display:flex; gap:8px; }
+  nav button{
+    background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.4);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  nav button.active{ background:#fff; color:var(--primary-dark); font-weight:bold; }
+
+  .container{ max-width:900px; margin:24px auto; padding:0 16px; }
+  .card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:24px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  }
+  .card h2{ margin-top:0; font-size:18px; color:var(--primary-dark); }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:600;
+    font-size:14px;
+  }
+  .field .hint{ font-weight:400; color:#5a6b76; font-size:12px; margin-right:6px; }
+  .field input, .field select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    background:#fbfdfe;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--primary);
+    background:#fff;
+  }
+  .fr-field input{ direction:ltr; text-align:right; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:600px){ .row2{ grid-template-columns:1fr; } }
+
+  .btn{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:11px 22px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+  }
+  .btn:hover{ background:var(--primary-dark); }
+  .btn.secondary{ background:#fff; color:var(--primary); border:1px solid var(--primary); }
+  .btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+  .msg{ padding:12px 14px; border-radius:6px; margin-top:14px; font-size:14px; display:none; }
+  .msg.ok{ background:#eafaf1; color:var(--ok); border:1px solid #b7e4c7; display:block; }
+  .msg.err{ background:#fdecea; color:var(--danger); border:1px solid #f5c6cb; display:block; }
+
+  .username-box{
+    background:var(--accent);
+    border:1px dashed var(--primary);
+    border-radius:8px;
+    padding:14px;
+    margin-top:10px;
+    font-size:15px;
+    direction:ltr;
+    text-align:center;
+    letter-spacing:1px;
+    font-weight:bold;
+    color:var(--primary-dark);
+  }
+
+  .search-bar{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .search-bar input{
+    flex:1;
+    min-width:160px;
+    padding:9px 12px;
+    border:1px solid var(--border);
+    border-radius:6px;
+  }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ padding:9px 8px; border-bottom:1px solid var(--border); text-align:right; }
+  th{ background:var(--accent); color:var(--primary-dark); position:sticky; top:0; }
+  tr:hover{ background:#f7fbfd; }
+  .fr{ direction:ltr; text-align:left; }
+  .table-wrap{ overflow-x:auto; max-height:520px; overflow-y:auto; }
+  .count-badge{ background:var(--primary); color:#fff; border-radius:20px; padding:2px 10px; font-size:12px; }
+  .hidden{ display:none !important; }
+
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,25,35,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:16px;
+    z-index:1000;
+  }
+  .modal-box{
+    background:#fff;
+    border-radius:10px;
+    padding:24px;
+    width:100%;
+    max-width:520px;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .modal-box h2{ margin-top:0; color:var(--primary-dark); }
+  .action-btn{
+    border:none;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:12px;
+    cursor:pointer;
+    margin-left:4px;
+  }
+  .action-btn.edit{ background:var(--accent); color:var(--primary-dark); }
+  .action-btn.delete{ background:#fdecea; color:var(--danger); }
+  .lock-screen{ text-align:center; padding:40px 20px; }
+  .lock-screen input{ max-width:260px; margin:0 auto 14px; }
+  small.note{ color:#5a6b76; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 استمارة تسجيل الطلبة</h1>
+  <nav>
+    <button id="tabRegisterBtn" class="active" onclick="showTab('register')">تسجيل طالب</button>
+    <button id="tabAdminBtn" onclick="showTab('admin')">لوحة الإدارة</button>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- ==================== REGISTRATION TAB ==================== -->
+  <div id="tab-register">
+    <div class="card">
+      <h2>معلومات الطالب</h2>
+      <div class="row2">
+        <div class="field fr-field">
+          <label>Nom (الاسم) <span class="hint">بالفرنسية</span></label>
+          <input type="text" id="nom" placeholder="ex: BOUZID">
+        </div>
+        <div class="field fr-field">
+          <label>Prénom (اللقب) <span class="hint">بالفرنسية</span></label>
+          <input type="text" id="prenom" placeholder="ex: Amine">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>رقم تسجيل الباكالوريا</label>
+          <input type="text" id="bacNumber" class="fr" placeholder="ex: 390005263" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>سنة الباكالوريا</label>
+          <input type="text" id="bacYear" class="fr" placeholder="ex: 2021" inputmode="numeric" maxlength="4">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" id="password" class="fr" placeholder="مثال: Mizage2021!" autocomplete="new-password">
+      </div>
+
+      <div class="field">
+        <label>اسم المستخدم (يتولّد تلقائياً)</label>
+        <div class="username-box" id="usernamePreview">سنة الباكالوريا + رقم التسجيل</div>
+        <small class="note">مثال: سنة 2021 + رقم 390005263 = 2021390005263</small>
+      </div>
+
+      <button class="btn" id="submitBtn" onclick="submitRegistration()">تسجيل</button>
+      <div class="msg" id="registerMsg"></div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN TAB ==================== -->
+  <div id="tab-admin" class="hidden">
+
+    <div class="card lock-screen" id="adminLock">
+      <h2>دخول لوحة الإدارة</h2>
+      <input type="email" id="adminEmail" placeholder="بريد الإدارة الإلكتروني" autocomplete="off" style="margin-bottom:10px;">
+      <input type="password" id="adminPass" placeholder="كلمة مرور الإدارة" autocomplete="off">
+      <div><button class="btn" onclick="checkAdminPass()">دخول</button></div>
+      <div class="msg" id="adminLoginMsg"></div>
+    </div>
+
+    <div class="card hidden" id="adminPanel">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="margin:0;">جميع الطلبة المسجلين <span class="count-badge" id="totalCount">0</span></h2>
+        <button class="btn secondary" onclick="adminLogout()">تسجيل الخروج</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="ابحث بالاسم، اللقب، رقم التسجيل أو السنة..." oninput="renderTable()">
+        <select id="yearFilter" onchange="renderTable()">
+          <option value="">كل السنوات</option>
+        </select>
+        <button class="btn secondary" onclick="loadStudents()">تحديث</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>رقم التسجيل</th>
+              <th>السنة</th>
+              <th>اسم المستخدم</th>
+              <th>كلمة المرور</th>
+              <th>تاريخ التسجيل</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="studentsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== EDIT MODAL ==================== -->
+<div id="editOverlay" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2>تعديل بيانات الطالب</h2>
+    <div class="row2">
+      <div class="field fr-field">
+        <label>Nom</label>
+        <input type="text" id="editNom">
+      </div>
+      <div class="field fr-field">
+        <label>Prénom</label>
+        <input type="text" id="editPrenom">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>رقم تسجيل الباكالوريا</label>
+        <input type="text" id="editBacNumber" class="fr">
+      </div>
+      <div class="field">
+        <label>سنة الباكالوريا</label>
+        <input type="text" id="editBacYear" class="fr" maxlength="4">
+      </div>
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="text" id="editPassword" class="fr" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>اسم المستخدم (يتولّد تلقائياً)</label>
+      <div class="username-box" id="editUsernamePreview">—</div>
+    </div>
+    <div class="msg" id="editMsg"></div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn" onclick="saveEdit()">حفظ التعديلات</button>
+      <button class="btn secondary" onclick="closeEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   ⚠️ ضع هنا إعدادات مشروع Firebase الخاص بك (Firebase Realtime Database)
+   Firebase Console → Project Settings → General → Your apps → SDK config
+========================================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAozz_dvaJoF96q6wQoAej-e93VfB51lxg",
+  authDomain: "progres-7b444.firebaseapp.com",
+  projectId: "progres-7b444",
+  storageBucket: "progres-7b444.firebasestorage.app",
+  messagingSenderId: "435455374113",
+  appId: "1:435455374113:web:50d6186ed12e27debfc460",
+  measurementId: "G-L306Q5244F"
+};
+
+// اسم الـ collection داخل Firestore
+const DB_NODE = "students";
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// إذا كان الأدمن مسجّل دخول مسبقاً (الجلسة محفوظة)، اعرض اللوحة مباشرة
+auth.onAuthStateChanged(user => {
+  if(user){
+    document.getElementById('adminLock').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    loadStudents();
+  } else {
+    document.getElementById('adminLock').classList.remove('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
+  }
+});
+
+/* ---------------- Tabs ---------------- */
+function showTab(tab){
+  document.getElementById('tab-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-admin').classList.toggle('hidden', tab !== 'admin');
+  document.getElementById('tabRegisterBtn').classList.toggle('active', tab === 'register');
+  document.getElementById('tabAdminBtn').classList.toggle('active', tab === 'admin');
+  if(tab === 'admin' && !document.getElementById('adminPanel').classList.contains('hidden')){
+    loadStudents();
+  }
+}
+
+/* ---------------- Username live preview ---------------- */
+function updateUsernamePreview(){
+  const year = document.getElementById('bacYear').value.trim();
+  const num = document.getElementById('bacNumber').value.trim();
+  const box = document.getElementById('usernamePreview');
+  if(year && num){
+    box.textContent = year + num;
+  } else {
+    box.textContent = "سنة الباكالوريا + رقم التسجيل";
+  }
+}
+document.getElementById('bacYear').addEventListener('input', updateUsernamePreview);
+document.getElementById('bacNumber').addEventListener('input', updateUsernamePreview);
+
+/* ---------------- Registration submit ---------------- */
+function submitRegistration(){
+  const nom = document.getElementById('nom').value.trim();
+  const prenom = document.getElementById('prenom').value.trim();
+  const bacNumber = document.getElementById('bacNumber').value.trim();
+  const bacYear = document.getElementById('bacYear').value.trim();
+  const password = document.getElementById('password').value;
+  const msg = document.getElementById('registerMsg');
+  const btn = document.getElementById('submitBtn');
+
+  msg.className = 'msg';
+  msg.style.display = 'none';
+
+  if(!nom || !prenom || !bacNumber || !bacYear || !password){
+    msg.className = 'msg err';
+    msg.textContent = 'الرجاء ملء جميع الخانات.';
+    return;
+  }
+  if(!/^\d+$/.test(bacYear) || bacYear.length !== 4){
+    msg.className = 'msg err';
+    msg.textContent = 'سنة الباكالوريا يجب أن تتكون من 4 أرقام.';
+    return;
+  }
+  if(!/^\d+$/.test(bacNumber)){
+    msg.className = 'msg err';
+    msg.textContent = 'رقم تسجيل الباكالوريا يجب أن يحتوي على أرقام فقط.';
+    return;
+  }
+
+  const username = bacYear + bacNumber;
+  btn.disabled = true;
+
+  db.collection(DB_NODE).add({
+    nom: nom,
+    prenom: prenom,
+    bacNumber: bacNumber,
+    bacYear: bacYear,
+    username: username,
+    password: password,
+    createdAt: new Date().toISOString()
+  }).then(() => {
+    msg.className = 'msg ok';
+    msg.textContent = 'تم التسجيل بنجاح ✅ — اسم المستخدم الخاص بك هو: ' + username;
+    document.getElementById('nom').value = '';
+    document.getElementById('prenom').value = '';
+    document.getElementById('bacNumber').value = '';
+    document.getElementById('bacYear').value = '';
+    document.getElementById('password').value = '';
+    updateUsernamePreview();
+  }).catch(err => {
+    msg.className = 'msg err';
+    msg.textContent = 'خطأ أثناء الحفظ: ' + err.message;
+  }).finally(() => {
+    btn.disabled = false;
+  });
+}
+
+/* ---------------- Admin login (Firebase Authentication) ---------------- */
+function checkAdminPass(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass = document.getElementById('adminPass').value;
+  const msg = document.getElementById('adminLoginMsg');
+  msg.className = 'msg';
+  msg.style.display = 'none';
+
+  if(!email || !pass){
+    msg.className = 'msg err';
+    msg.textContent = 'الرجاء إدخال البريد الإلكتروني وكلمة المرور.';
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, pass).then(() => {
+    // onAuthStateChanged يتكفّل بإظهار اللوحة تلقائياً
+    document.getElementById('adminEmail').value = '';
+    document.getElementById('adminPass').value = '';
+  }).catch(err => {
+    msg.className = 'msg err';
+    if(err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found'){
+      msg.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    } else {
+      msg.textContent = 'خطأ أثناء تسجيل الدخول: ' + err.message;
+    }
+  });
+}
+
+function adminLogout(){
+  auth.signOut();
+}
+
+/* ---------------- Admin: load & render ---------------- */
+let allStudents = [];
+
+function loadStudents(){
+  db.collection(DB_NODE).get().then(snap => {
+    allStudents = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    allStudents.sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    populateYearFilter();
+    renderTable();
+  }).catch(err => {
+    console.error('loadStudents error:', err);
+    alert('تعذر تحميل البيانات: ' + err.message);
+  });
+}
+
+function populateYearFilter(){
+  const select = document.getElementById('yearFilter');
+  const current = select.value;
+  const years = [...new Set(allStudents.map(s => s.bacYear))].sort();
+  select.innerHTML = '<option value="">كل السنوات</option>' +
+    years.map(y => `<option value="${y}">${y}</option>`).join('');
+  select.value = current;
+}
+
+function renderTable(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const yearFilter = document.getElementById('yearFilter').value;
+
+  const filtered = allStudents.filter(s => {
+    const matchesYear = !yearFilter || s.bacYear === yearFilter;
+    if(!matchesYear) return false;
+    if(!q) return true;
+    return (
+      (s.nom || '').toLowerCase().includes(q) ||
+      (s.prenom || '').toLowerCase().includes(q) ||
+      (s.bacNumber || '').includes(q) ||
+      (s.bacYear || '').includes(q) ||
+      (s.username || '').includes(q)
+    );
+  });
+
+  document.getElementById('totalCount').textContent = filtered.length;
+
+  const body = document.getElementById('studentsBody');
+  body.innerHTML = filtered.map(s => `
+    <tr>
+      <td class="fr">${escapeHtml(s.nom || '')}</td>
+      <td class="fr">${escapeHtml(s.prenom || '')}</td>
+      <td class="fr">${escapeHtml(s.bacNumber || '')}</td>
+      <td class="fr">${escapeHtml(s.bacYear || '')}</td>
+      <td class="fr">${escapeHtml(s.username || '')}</td>
+      <td class="fr">${escapeHtml(s.password || '')}</td>
+      <td class="fr">${s.createdAt ? new Date(s.createdAt).toLocaleString('fr-FR') : ''}</td>
+      <td>
+        <button class="action-btn edit" onclick="openEditModal('${s.id}')">تعديل</button>
+        <button class="action-btn delete" onclick="deleteStudent('${s.id}')">حذف</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;">لا توجد نتائج</td></tr>';
+}
+
+/* ---------------- Admin: edit ---------------- */
+let editingId = null;
+
+function openEditModal(id){
+  const s = allStudents.find(x => x.id === id);
+  if(!s) return;
+  editingId = id;
+  document.getElementById('editNom').value = s.nom || '';
+  document.getElementById('editPrenom').value = s.prenom || '';
+  document.getElementById('editBacNumber').value = s.bacNumber || '';
+  document.getElementById('editBacYear').value = s.bacYear || '';
+  document.getElementById('editPassword').value = s.password !== undefined ? s.password : '';
+  document.getElementById('editMsg').className = 'msg';
+  document.getElementById('editMsg').style.display = 'none';
+  updateEditUsernamePreview();
+  document.getElementById('editOverlay').classList.remove('hidden');
+}
+
+function closeEditModal(){
+  editingId = null;
+  document.getElementById('editOverlay').classList.add('hidden');
+}
+
+function updateEditUsernamePreview(){
+  const year = document.getElementById('editBacYear').value.trim();
+  const num = document.getElementById('editBacNumber').value.trim();
+  document.getElementById('editUsernamePreview').textContent = (year && num) ? (year + num) : '—';
+}
+document.getElementById('editBacYear').addEventListener('input', updateEditUsernamePreview);
+document.getElementById('editBacNumber').addEventListener('input', updateEditUsernamePreview);
+
+function saveEdit(){
+  if(!editingId) return;
+  const nom = document.getElementById('editNom').value.trim();
+  const prenom = document.getElementById('editPrenom').value.trim();
+  const bacNumber = document.getElementById('editBacNumber').value.trim();
+  const bacYear = document.getElementById('editBacYear').value.trim();
+  const password = document.getElementById('editPassword').value;
+  const msg = document.getElementById('editMsg');
+
+  if(!nom || !prenom || !bacNumber || !bacYear || !password){
+    msg.className = 'msg err';
+    msg.textContent = 'الرجاء ملء جميع الخانات.';
+    return;
+  }
+  if(!/^\d{4}$/.test(bacYear)){
+    msg.className = 'msg err';
+    msg.textContent = 'سنة الباكالوريا يجب أن تتكون من 4 أرقام.';
+    return;
+  }
+  if(!/^\d+$/.test(bacNumber)){
+    msg.className = 'msg err';
+    msg.textContent = 'رقم تسجيل الباكالوريا يجب أن يحتوي على أرقام فقط.';
+    return;
+  }
+
+  const username = bacYear + bacNumber;
+
+  db.collection(DB_NODE).doc(editingId).set({
+    nom, prenom, bacNumber, bacYear, password, username
+  }, { merge: true }).then(() => {
+    msg.className = 'msg ok';
+    msg.textContent = 'تم حفظ التعديلات بنجاح ✅';
+    loadStudents();
+    setTimeout(closeEditModal, 700);
+  }).catch(err => {
+    console.error('saveEdit error:', err);
+    msg.className = 'msg err';
+    msg.textContent = 'خطأ أثناء الحفظ: ' + err.message;
+  });
+}
+
+/* ---------------- Admin: delete ---------------- */
+function deleteStudent(id){
+  const s = allStudents.find(x => x.id === id);
+  if(!s) return;
+  const ok = confirm(`هل تريد فعلاً حذف بيانات: ${s.nom} ${s.prenom} (${s.username})؟`);
+  if(!ok) return;
+
+  db.collection(DB_NODE).doc(id).delete().then(() => {
+    loadStudents();
+  }).catch(err => {
+    alert('تعذر الحذف: ' + err.message);
+  });
+}
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#039;');
+}
+</script>
+</body>
+</html>
