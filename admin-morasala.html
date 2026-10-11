@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة ملفات المراسلة - سوبير إعلام آلي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -13,24 +14,31 @@
         .back-btn { background: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 8px 20px; border-radius: 10px; font-weight: bold; }
 
         .controls-section { padding: 20px 40px; background: white; border-bottom: 1px solid #e3e6f0; }
-        .search-input { width: 100%; padding: 12px; border: 2px solid #eaecf4; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; outline: none; margin-bottom: 15px; }
+        .search-input { width: 100%; box-sizing: border-box; padding: 12px; border: 2px solid #eaecf4; border-radius: 10px; font-family: 'Cairo'; font-size: 16px; outline: none; margin-bottom: 15px; }
 
-        /* ستايل الفلاتر */
         .filters-wrapper { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .filter-label { font-weight: bold; color: var(--gray-dark); font-size: 14px; }
-        .filter-chip { padding: 6px 15px; border-radius: 20px; background: #eaecf4; color: #4e73df; cursor: pointer; border: 1px solid transparent; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .filter-chip { padding: 6px 15px; border-radius: 20px; background: #eaecf4; color: #4e73df; cursor: pointer; border: 1px solid transparent; font-size: 13px; font-weight: bold; transition: 0.3s; font-family: 'Cairo'; }
         .filter-chip:hover { background: #dddfeb; }
         .filter-chip.active { background: var(--primary); color: white; border-color: var(--dark); }
         .filter-chip.special { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .filter-chip.special.active { background: #f6c23e; color: white; }
 
+        .counter { margin-right: auto; font-weight: bold; color: var(--gray-dark); font-size: 14px; }
+
         .table-container { padding: 20px 40px; overflow-x: auto; }
-        table { width: 100%; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-collapse: collapse; min-width: 1100px; }
-        th, td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #eee; }
+        table { width: 100%; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-collapse: collapse; min-width: 1300px; }
+        th, td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #eee; font-size: 14px; }
         th { background: #f1f4f9; color: #333; font-weight: 900; }
+        .ltr { direction: ltr; unicode-bidi: plain; }
+        .muted { color: #aaa; }
+        .notes-cell { max-width: 180px; text-align: right; font-size: 13px; color: #555; white-space: pre-wrap; word-break: break-word; }
+
+        .cred { display: inline-flex; align-items: center; gap: 6px; background: #f1f4f9; padding: 4px 10px; border-radius: 8px; font-family: monospace; }
+        .cred i { cursor: pointer; color: var(--primary); }
         
         .steps-wrapper { display: flex; gap: 4px; justify-content: center; }
-        .step-btn { padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; background: #f8f9fc; color: #888; font-size: 10px; cursor: pointer; transition: 0.3s; }
+        .step-btn { padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; background: #f8f9fc; color: #888; font-size: 10px; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
         .step-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
 
         .status-pill { 
@@ -43,8 +51,15 @@
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:25px; border-radius:20px; width:95%; max-width:700px; max-height: 90vh; overflow-y: auto; }
         .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .editor-grid .full { grid-column: span 2; }
         .input-group { display: flex; flex-direction: column; gap: 4px; text-align: right; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; }
+        input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; font-size: 14px; }
+
+        @media (max-width: 600px) {
+            .header, .controls-section, .table-container { padding-left: 15px; padding-right: 15px; }
+            .editor-grid { grid-template-columns: 1fr; }
+            .editor-grid .full { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
@@ -55,7 +70,7 @@
     </div>
 
     <div class="controls-section">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن اسم المترشح هنا..." onkeyup="applyFilters()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث بالاسم أو الهاتف أو البريد أو اسم المستخدم أو رقم الاستمارة..." onkeyup="applyFilters()">
         
         <div class="filters-wrapper">
             <span class="filter-label"><i class="fas fa-filter"></i> تصفية:</span>
@@ -63,9 +78,8 @@
                 <button class="filter-chip active" id="btnAll" onclick="filterBy('all', this)">الكل</button>
                 <button class="filter-chip special" onclick="filterBy('eQuiz', this)">أتموا الفرض الإلكتروني ✅</button>
             </div>
-            <div id="dynamicStatusFilters" style="display: flex; gap: 8px;">
-                <!-- هنا ستظهر فلاتر الحالات تلقائياً -->
-            </div>
+            <div id="dynamicStatusFilters" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            <span class="counter" id="counter"></span>
         </div>
     </div>
 
@@ -73,8 +87,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>الاسم</th>
-                    <th>المستوى</th>
+                    <th>الاسم واللقب</th>
+                    <th>الهاتف</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>رقم الاستمارة</th>
+                    <th>اسم المستخدم</th>
+                    <th>كلمة المرور</th>
+                    <th>ملاحظات</th>
                     <th>متابعة الفروض (تفاعلي)</th>
                     <th>الحالة</th>
                     <th>الإجراءات</th>
@@ -89,8 +108,8 @@
         <div class="modal-content">
             <h3 style="margin:0">تعديل معلومات المترشح 🖊️</h3>
             <div id="editor" class="editor-grid"></div>
-            <button onclick="saveData()" style="width:100%; background:var(--primary); color:white; padding:15px; border-radius:10px; border:none; margin-top:20px; cursor:pointer; font-weight:bold;">حفظ التغييرات</button>
-            <button onclick="closeModal()" style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer;">إلغلاق</button>
+            <button onclick="saveData()" style="width:100%; background:var(--primary); color:white; padding:15px; border-radius:10px; border:none; margin-top:20px; cursor:pointer; font-weight:bold; font-family:'Cairo';">حفظ التغييرات</button>
+            <button onclick="closeModal()" style="width:100%; margin-top:10px; border:none; background:none; cursor:pointer; font-family:'Cairo';">إغلاق</button>
         </div>
     </div>
 
@@ -109,6 +128,9 @@
     let currentFilterType = 'all';
     let currentStatusFilter = null;
 
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const dash = '<span class="muted">---</span>';
+
     onSnapshot(collection(db, "registrations"), (snap) => {
         master = [];
         snap.forEach(d => {
@@ -120,14 +142,17 @@
         applyFilters();
     });
 
-    // إنشاء فلاتر الحالة تلقائياً بناءً على البيانات الموجودة
     function generateStatusFilters() {
         const container = document.getElementById('dynamicStatusFilters');
         const uniqueStatuses = [...new Set(master.map(item => item.status).filter(s => s))];
         
         container.innerHTML = "";
         uniqueStatuses.forEach(status => {
-            container.innerHTML += `<button class="filter-chip ${currentStatusFilter === status ? 'active' : ''}" onclick="filterByStatus('${status}', this)">${status}</button>`;
+            const b = document.createElement('button');
+            b.className = 'filter-chip' + (currentStatusFilter === status ? ' active' : '');
+            b.textContent = status;
+            b.onclick = () => filterByStatus(status, b);
+            container.appendChild(b);
         });
     }
 
@@ -150,12 +175,13 @@
         activeBtn.classList.add('active');
     }
 
-    // تطبيق الفلترة + الترتيب
     window.applyFilters = () => {
-        const searchVal = document.getElementById('searchInput').value.toLowerCase();
+        const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
         
         let filtered = master.filter(item => {
-            const matchesSearch = item.fullName?.toLowerCase().includes(searchVal);
+            const haystack = [item.fullName, item.phone, item.email, item.username, item.formId]
+                .map(v => String(v ?? '').toLowerCase()).join(' ');
+            const matchesSearch = haystack.includes(searchVal);
             const finishedQuiz = (item.e1 === true || item.e2 === true);
 
             if (currentFilterType === 'eQuiz') return matchesSearch && finishedQuiz;
@@ -163,13 +189,13 @@
             return matchesSearch;
         });
 
-        // الترتيب: من عمل فرض الكتروني يظهر أولاً
         filtered.sort((a, b) => {
             const aFinished = (a.e1 === true || a.e2 === true) ? 1 : 0;
             const bFinished = (b.e1 === true || b.e2 === true) ? 1 : 0;
-            return bFinished - aFinished; // تنازلي (1 يظهر قبل 0)
+            return bFinished - aFinished;
         });
 
+        document.getElementById('counter').textContent = `العدد: ${filtered.length}`;
         renderTable(filtered);
     };
 
@@ -190,14 +216,24 @@
             });
             stepsHtml += '</div>';
 
+            const phone = data.phone ? `<a class="ltr" href="tel:${esc(data.phone)}" style="color:inherit;text-decoration:none">${esc(data.phone)}</a>` : dash;
+            const email = data.email ? `<span class="ltr">${esc(data.email)}</span>` : dash;
+            const user = data.username ? `<span class="cred ltr">${esc(data.username)} <i class="fas fa-copy" title="نسخ" onclick="copyText(this, '${data.id}', 'username')"></i></span>` : dash;
+            const pass = data.password ? `<span class="cred ltr">${esc(data.password)} <i class="fas fa-copy" title="نسخ" onclick="copyText(this, '${data.id}', 'password')"></i></span>` : dash;
+
             body.innerHTML += `
                 <tr style="${(data.e1 || data.e2) ? 'background: #f0f4ff' : ''}">
-                    <td style="font-weight:bold">${data.fullName || '---'}</td>
-                    <td>${data.level || '---'}</td>
+                    <td style="font-weight:bold">${esc(data.fullName) || dash}</td>
+                    <td>${phone}</td>
+                    <td>${email}</td>
+                    <td>${esc(data.formId) || dash}</td>
+                    <td>${user}</td>
+                    <td>${pass}</td>
+                    <td class="notes-cell">${esc(data.notes) || dash}</td>
                     <td>${stepsHtml}</td>
                     <td>
-                        <div class="status-pill" onclick="quickEditStatus('${data.id}', '${data.status || ''}')">
-                            ${data.status || 'أدخل الحالة 🖊️'}
+                        <div class="status-pill" onclick="quickEditStatus('${data.id}')">
+                            ${esc(data.status) || 'أدخل الحالة 🖊️'}
                         </div>
                     </td>
                     <td>
@@ -208,8 +244,17 @@
         });
     }
 
-    // --- الدوال الأساسية الأخرى (تعديل، حذف، حفظ) ---
-    window.quickEditStatus = async (id, old) => {
+    window.copyText = async (icon, id, field) => {
+        const item = master.find(m => m.id === id);
+        try {
+            await navigator.clipboard.writeText(item?.[field] || '');
+            icon.className = 'fas fa-check';
+            setTimeout(() => icon.className = 'fas fa-copy', 1200);
+        } catch (e) {}
+    };
+
+    window.quickEditStatus = async (id) => {
+        const old = master.find(m => m.id === id)?.status || '';
         const newVal = prompt("اكتب الحالة الجديدة:", old);
         if (newVal !== null) await updateDoc(doc(db, "registrations", id), { status: newVal });
     };
@@ -219,24 +264,33 @@
     };
 
     window.openEdit = (id) => {
-        const curID = id; window.currentEditID = id;
+        window.currentEditID = id;
         const data = master.find(m => m.id === id);
         const editor = document.getElementById('editor'); editor.innerHTML = "";
         const fields = [
-            { id: "fullName", label: "الاسم الكامل" }, { id: "level", label: "المستوى الدراسي" },
-            { id: "username", label: "اسم المستخدم" }, { id: "password", label: "كلمة السر" },
-            { id: "status", label: "الحالة" }
+            { id: "fullName", label: "الاسم واللقب", full: true },
+            { id: "phone", label: "رقم الهاتف", ltr: true },
+            { id: "email", label: "البريد الإلكتروني (اختياري)", ltr: true },
+            { id: "username", label: "اسم المستخدم", ltr: true },
+            { id: "password", label: "كلمة المرور", ltr: true },
+            { id: "formId", label: "رقم الاستمارة (اختياري)" },
+            { id: "status", label: "الحالة" },
+            { id: "notes", label: "ملاحظات إضافية", full: true, area: true }
         ];
         fields.forEach(f => {
-            editor.innerHTML += `<div class="input-group"><label>${f.label}</label>
-                <input type="text" id="inp_${f.id}" value="${data[f.id]||''}"></div>`;
+            const val = esc(data[f.id] || '');
+            const style = f.ltr ? 'style="direction:ltr;text-align:right"' : '';
+            const control = f.area
+                ? `<textarea id="inp_${f.id}" rows="3">${val}</textarea>`
+                : `<input type="text" id="inp_${f.id}" value="${val}" ${style}>`;
+            editor.innerHTML += `<div class="input-group ${f.full ? 'full' : ''}"><label>${f.label}</label>${control}</div>`;
         });
         document.getElementById('editModal').style.display = 'flex';
     };
 
     window.saveData = async () => {
         const updates = {};
-        document.querySelectorAll('#editor input').forEach(i => updates[i.id.replace('inp_','')] = i.value);
+        document.querySelectorAll('#editor input, #editor textarea').forEach(i => updates[i.id.replace('inp_','')] = i.value.trim());
         await updateDoc(doc(db, "registrations", window.currentEditID), updates);
         window.closeModal();
     };
