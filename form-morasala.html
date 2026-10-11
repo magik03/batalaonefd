@@ -49,11 +49,12 @@
         .field-group { display: flex; flex-direction: column; text-align: right; }
         .field-group label { font-weight: 700; margin-bottom: 8px; font-size: 15px; color: #333; }
         .field-group label i { color: var(--primary); margin-left: 8px; }
+        .field-group label .opt { font-weight: 400; font-size: 12px; color: #888; margin-right: 6px; }
         .field-group input, .field-group textarea, .field-group select { 
             padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; 
             font-family: 'Cairo'; font-size: 16px; transition: 0.3s;
         }
-        .field-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(78,115,223,0.2); }
+        .field-group input:focus, .field-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(78,115,223,0.2); }
 
         .submit-btn {
             grid-column: span 2; padding: 18px; background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
@@ -61,8 +62,14 @@
             cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(78,115,223,0.3); }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         
         .back-link { text-align: center; margin: 20px 0 40px; display: block; color: #888; text-decoration: none; font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .form-body { grid-template-columns: 1fr; padding: 25px; }
+            .full-col, .submit-btn { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
@@ -77,23 +84,18 @@
 <div class="form-container">
     <form class="form-body" id="moraForm">
         <div class="field-group full-col">
-            <label><i class="fas fa-user"></i> الاسم واللقب الكامل (بالعربية)</label>
-            <input type="text" id="fullName" placeholder="أدخل اسمك الثلاثي" required>
+            <label><i class="fas fa-user"></i> الاسم واللقب (بالعربية أو الفرنسية)</label>
+            <input type="text" id="fullName" placeholder="Nom et Prénom / الاسم واللقب" required>
         </div>
 
         <div class="field-group">
-            <label><i class="fas fa-file-invoice"></i> رقم الاستمارة</label>
-            <input type="text" id="formId" placeholder="رقم التسجيل" required>
+            <label><i class="fas fa-phone"></i> رقم الهاتف</label>
+            <input type="tel" id="phone" style="direction: ltr; text-align: right;" placeholder="05 / 06 / 07 XX XX XX XX" required>
         </div>
 
         <div class="field-group">
-            <label><i class="fas fa-layer-group"></i> المستوى الدراسي</label>
-            <input type="text" id="level" placeholder="مثال: 3 ثانوي / 4 متوسط" required>
-        </div>
-
-        <div class="field-group">
-            <label><i class="fas fa-calendar-alt"></i> تاريخ الازدياد</label>
-            <input type="date" id="birthDate" required>
+            <label><i class="fas fa-envelope"></i> البريد الإلكتروني <span class="opt">(اختياري)</span></label>
+            <input type="email" id="email" style="direction: ltr; text-align: right;" placeholder="example@email.com">
         </div>
 
         <div class="field-group">
@@ -107,8 +109,8 @@
         </div>
 
         <div class="field-group full-col">
-            <label><i class="fas fa-link"></i> رابط الملف (إن وجد)</label>
-            <input type="url" id="externalLink" style="direction: ltr;" placeholder="https://example.com/file.pdf">
+            <label><i class="fas fa-file-invoice"></i> رقم الاستمارة <span class="opt">(اختياري)</span></label>
+            <input type="text" id="formId" placeholder="رقم التسجيل">
         </div>
 
         <div class="field-group full-col">
@@ -150,14 +152,13 @@
             serviceType: 'مراسلة',
             status: 'قيد الانتظار ⏳',
             createdAt: new Date().toISOString(),
-            fullName: document.getElementById('fullName').value,
-            formId: document.getElementById('formId').value,
-            level: document.getElementById('level').value, // تم إضافة الحقل هنا
-            birthDate: document.getElementById('birthDate').value,
-            username: document.getElementById('username').value,
+            fullName: document.getElementById('fullName').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            formId: document.getElementById('formId').value.trim(),
+            username: document.getElementById('username').value.trim(),
             password: document.getElementById('password').value,
-            externalLink: document.getElementById('externalLink').value,
-            notes: document.getElementById('notes').value
+            notes: document.getElementById('notes').value.trim()
         };
 
         try {
